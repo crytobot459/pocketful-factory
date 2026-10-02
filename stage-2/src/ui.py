@@ -36,9 +36,8 @@ padding:0.55rem 1rem;background:var(--brand);color:#fff;font-weight:600}
 button.secondary{background:#fff;color:var(--brand);border-color:var(--brand)}
 button:disabled{opacity:0.55;cursor:default}
 .row{display:flex;gap:0.6rem;flex-wrap:wrap;align-items:end}
-.err{display:none;background:var(--danger-bg);color:var(--danger);border:1px solid #fecaca;
+.err{background:var(--danger-bg);color:var(--danger);border:1px solid #fecaca;
 border-radius:8px;padding:0.55rem 0.7rem;margin-top:0.6rem}
-.err.show{display:block}
 .uncertain{display:none;background:var(--warn-bg);color:var(--warn);border:1px solid #fde68a;
 border-radius:8px;padding:0.55rem 0.7rem;margin-top:0.6rem}
 .uncertain.show{display:block}
@@ -114,11 +113,29 @@ function newKey(){
   if(window.crypto&&crypto.randomUUID){return crypto.randomUUID();}
   return 'k-'+Date.now()+'-'+Math.floor(Math.random()*1e9);
 }
+function errSlot(id){
+  var slot=document.querySelector('[data-errslot="'+id+'"]');
+  if(slot){return slot;}
+  return document.querySelector('[data-testid="'+id+'"]')||null;
+}
+// An error element exists only while there is an error to show: it is created on
+// demand and removed when cleared, so a caller can ask whether one is on screen.
 function showErr(id,msg){
-  var el=document.querySelector('[data-testid="'+id+'"]');
-  if(!el){return;}
-  if(msg){el.textContent=msg;el.classList.add('show');}
-  else{el.textContent='';el.classList.remove('show');}
+  var slot=errSlot(id);
+  if(!slot){return;}
+  var el=slot.querySelector('[data-testid="'+id+'"]');
+  if(!msg){
+    if(el){el.remove();}
+    return;
+  }
+  if(!el){
+    el=document.createElement('div');
+    el.className='err';
+    el.setAttribute('data-testid',id);
+    el.setAttribute('role','alert');
+    slot.appendChild(el);
+  }
+  el.textContent=msg;
 }
 async function loadMe(){
   try{
@@ -176,7 +193,7 @@ def page_signup():
         '<button data-testid="signup-submit" type="submit">Sign up</button>'
         '<a class="btn secondary" style="text-decoration:none" href="/login">Log in</a>'
         "</div></form>"
-        '<div class="err" data-testid="auth-error" role="alert"></div>'
+        '<div data-errslot="auth-error"></div>'
         '<p class="muted">Already have an account? <a href="/login">Log in</a>.</p>'
         "</div>"
     )
@@ -209,7 +226,7 @@ def page_login():
         '<button data-testid="login-submit" type="submit">Log in</button>'
         '<a class="btn secondary" style="text-decoration:none" href="/signup">Sign up</a>'
         "</div></form>"
-        '<div class="err" data-testid="auth-error" role="alert"></div>'
+        '<div data-errslot="auth-error"></div>'
         '<p class="muted">New to Pocketful? <a href="/signup">Create an account</a>.</p>'
         "</div>"
     )
@@ -246,7 +263,7 @@ def _authorize_form_html():
         '<div class="row" style="margin-top:0.8rem">'
         '<button data-testid="authorize-submit" id="asub" type="button">Authorize</button>'
         "</div>"
-        '<div class="err" data-testid="authorize-error" role="alert"></div>'
+        '<div data-errslot="authorize-error"></div>'
         "</div>"
     )
 
@@ -305,7 +322,7 @@ def page_home():
         '<div class="row" style="margin-top:0.8rem">'
         '<button data-testid="pay-submit" id="psub" type="button">Send payment</button>'
         "</div>"
-        '<div class="err" data-testid="pay-error" role="alert"></div>'
+        '<div data-errslot="pay-error"></div>'
         '<div class="uncertain" data-testid="pay-uncertain" role="status"></div>'
         "</div>"
         '<div class="card"><h2>Request money</h2>'
@@ -318,7 +335,7 @@ def page_home():
         '<div class="row" style="margin-top:0.8rem">'
         '<button data-testid="request-submit" id="rsub" type="button">Send request</button>'
         "</div>"
-        '<div class="err" data-testid="request-error" role="alert"></div>'
+        '<div data-errslot="request-error"></div>'
         "</div>"
         + _authorize_form_html()
         + '<div class="card"><h2>Activity</h2><div id="feed"><p class="loading">Loading…</p></div></div>'
@@ -429,7 +446,7 @@ def page_requests():
     main = (
         '<div id="app">'
         '<div class="card"><h1>Requests</h1>'
-        '<div class="err" data-testid="request-error" role="alert"></div>'
+        '<div data-errslot="request-error"></div>'
         "<h2>Incoming</h2>"
         '<div data-testid="incoming-list"><p class="loading">Loading…</p></div>'
         "<h2>Outgoing</h2>"
@@ -439,8 +456,9 @@ def page_requests():
     )
     js = """
 window.PFME=null;
+// Reloading the lists never touches the error element: the caller decides when an
+// error starts and when it ends, so a refresh cannot wipe a message it did not set.
 async function refreshReqs(){
-  showErr('request-error',null);
   var r;
   try{r=await api('/requests?limit=200');}
   catch(e){showErr('request-error','Network error, please retry.');return;}
@@ -511,7 +529,7 @@ def page_split():
         '<div class="row" style="margin-top:0.8rem">'
         '<button data-testid="split-submit" id="ssub" type="button">Create split</button>'
         "</div>"
-        '<div class="err" data-testid="split-error" role="alert"></div>'
+        '<div data-errslot="split-error"></div>'
         '<div id="previewbox" style="margin-top:0.8rem"></div>'
         "</div>"
     )
@@ -532,7 +550,11 @@ function updatePreview(){
   var shares=equalSplit(r.pr.minor,r.hs.length);
   var h='<div data-testid="split-preview"><div class="muted">Shares</div>';
   r.hs.forEach(function(x,i){
-    h+='<div data-testid="split-share-'+esc(x)+'">'+esc(x)+': '+esc(fmt(r.me.minor_units,r.me.currency,shares[i]))+'</div>';
+    // The amount lives alone in the addressed element; the handle is its own label,
+    // so a caller reading that element gets the share and nothing else.
+    h+='<div class="item"><span class="muted">'+esc(x)+'</span>'
+      +'<span class="amt" data-testid="split-share-'+esc(x)+'">'
+      +esc(fmt(r.me.minor_units,r.me.currency,shares[i]))+'</span></div>';
   });
   box.innerHTML=h+'</div>';
 }
@@ -567,7 +589,7 @@ def page_authorizations():
         '<div id="app">'
         + _authorize_form_html()
         + '<div class="card"><h1>Holds</h1>'
-        '<div class="err" data-testid="authorization-error" role="alert"></div>'
+        '<div data-errslot="authorization-error"></div>'
         '<div data-testid="authorization-list"><p class="loading">Loading…</p></div>'
         '<div id="emptybox"></div>'
         "</div></div>"
