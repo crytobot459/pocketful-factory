@@ -1,0 +1,17 @@
+.env
+.env.*
+agent_config.yaml
+agent_config.*.yaml
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+venv/
+.venv/
+.DS_Store
+out/
+*.log
+room.*.json
+room.download.json
+band-agents/.venv/
+band-agents/uv.lock
