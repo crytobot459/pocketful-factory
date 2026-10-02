@@ -1042,6 +1042,225 @@ def export_state():
     return {"track": "pocketful", "format_version": 1, "state": snap}
 
 
+def _is_int(v):
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def _validate_import_state(st):
+    """Validate an import `state` object and build a fresh, fully-owned
+    replacement state. Returns the new state dict, or None if invalid.
+    Everything is deep-copied so the live state never aliases the request
+    body: repeating an import restores the same snapshot without loss or
+    duplication, and later writes cannot mutate a previously sent export.
+    Stage-1 exports omit authorization fields entirely; those default."""
+    if not isinstance(st, dict):
+        return None
+    if not isinstance(st.get("users"), list):
+        return None
+    currency = st.get("currency")
+    if not isinstance(currency, str) or not currency:
+        return None
+    minor_units = st.get("minor_units")
+    if minor_units not in (0, 2, 3):
+        return None
+    n_users_by_id = {}
+    n_by_email = {}
+    n_by_handle = {}
+    for u in st["users"]:
+        if not isinstance(u, dict):
+            return None
+        uid = u.get("id")
+        email = u.get("email")
+        handle = u.get("handle")
+        if not isinstance(uid, str) or not uid:
+            return None
+        if not isinstance(email, str) or not isinstance(handle, str):
+            return None
+        if not isinstance(u.get("password_hash", ""), str):
+            return None
+        if not isinstance(u.get("display_name", handle), str):
+            return None
+        bal = u.get("balance", 0)
+        if not _is_int(bal):
+            return None
+        n_users_by_id[uid] = {
+            "id": uid, "email": email,
+            "password_hash": str(u.get("password_hash", "")),
+            "display_name": str(u.get("display_name", handle)),
+            "handle": handle, "balance": bal,
+        }
+        n_by_email[email] = uid
+        n_by_handle[handle] = uid
+    raw_payments = st.get("payments", [])
+    if not isinstance(raw_payments, list):
+        return None
+    n_payments = {}
+    for p in raw_payments:
+        if not isinstance(p, dict):
+            return None
+        pid = p.get("payment_id")
+        if not isinstance(pid, str) or not pid:
+            return None
+        for k in ("from_user_id", "to_user_id", "from_handle", "to_handle",
+                  "currency", "note", "visibility", "created_at"):
+            if k not in p:
+                return None
+        if not isinstance(p["from_user_id"], str) or not isinstance(p["to_user_id"], str):
+            return None
+        if not isinstance(p["from_handle"], str) or not isinstance(p["to_handle"], str):
+            return None
+        if not _is_int(p["amount"]):
+            return None
+        if not isinstance(p["currency"], str) or not isinstance(p["note"], str):
+            return None
+        if p["visibility"] not in ("public", "private"):
+            return None
+        if not isinstance(p["created_at"], str):
+            return None
+        for k in ("request_id", "settlement_id", "authorization_id"):
+            v = p.get(k)
+            if v is not None and not isinstance(v, str):
+                return None
+        seq = p.get("_seq", 0)
+        if not _is_int(seq):
+            return None
+        n_payments[str(pid)] = copy.deepcopy(p)
+    raw_requests = st.get("requests", [])
+    if not isinstance(raw_requests, list):
+        return None
+    n_requests = {}
+    for r in raw_requests:
+        if not isinstance(r, dict):
+            return None
+        rid = r.get("request_id")
+        if not isinstance(rid, str) or not rid:
+            return None
+        for k in ("requester_id", "requester_handle", "payer_id", "payer_handle",
+                  "currency", "note", "status", "created_at"):
+            if k not in r:
+                return None
+        if not isinstance(r["requester_id"], str) or not isinstance(r["payer_id"], str):
+            return None
+        if not isinstance(r["requester_handle"], str) or not isinstance(r["payer_handle"], str):
+            return None
+        if not _is_int(r["amount"]):
+            return None
+        if not isinstance(r["currency"], str) or not isinstance(r["note"], str):
+            return None
+        if r["status"] not in ("pending", "paid", "declined", "cancelled"):
+            return None
+        if not isinstance(r["created_at"], str):
+            return None
+        payid = r.get("payment_id")
+        if payid is not None and not isinstance(payid, str):
+            return None
+        seq = r.get("_seq", 0)
+        if not _is_int(seq):
+            return None
+        n_requests[str(rid)] = copy.deepcopy(r)
+    raw_auths = st.get("authorizations", [])
+    if not isinstance(raw_auths, list):
+        return None
+    n_auths = {}
+    for a in raw_auths:
+        if not isinstance(a, dict):
+            return None
+        aid = a.get("authorization_id")
+        if not isinstance(aid, str) or not aid:
+            return None
+        for k in ("from_user_id", "to_user_id", "from_handle", "to_handle",
+                  "currency", "note", "visibility", "status",
+                  "expires_at", "created_at"):
+            if k not in a:
+                return None
+        if not isinstance(a["from_user_id"], str) or not isinstance(a["to_user_id"], str):
+            return None
+        if not isinstance(a["from_handle"], str) or not isinstance(a["to_handle"], str):
+            return None
+        if not _is_int(a["amount"]):
+            return None
+        cap = a.get("captured_amount", 0)
+        if not _is_int(cap) or cap < 0:
+            return None
+        if not isinstance(a["currency"], str) or not isinstance(a["note"], str):
+            return None
+        if a["visibility"] not in ("public", "private"):
+            return None
+        if a["status"] not in ("open", "captured", "voided", "expired"):
+            return None
+        if not isinstance(a["expires_at"], str) or _parse_ts(a["expires_at"]) is None:
+            return None
+        if not isinstance(a["created_at"], str):
+            return None
+        pid1 = a.get("payment_id")
+        if pid1 is not None and not isinstance(pid1, str):
+            return None
+        pids = a.get("payment_ids", [])
+        if not isinstance(pids, list) or any(not isinstance(x, str) for x in pids):
+            return None
+        seq = a.get("_seq", 0)
+        if not _is_int(seq):
+            return None
+        n_auths[str(aid)] = copy.deepcopy(a)
+    n_ttl = st.get("authorization_ttl_seconds", 600)
+    if isinstance(n_ttl, bool):
+        return None
+    if isinstance(n_ttl, float) and float(n_ttl).is_integer():
+        n_ttl = int(n_ttl)
+    if not isinstance(n_ttl, int) or n_ttl < 1:
+        return None
+    raw_tokens = st.get("tokens", {})
+    if not isinstance(raw_tokens, dict):
+        return None
+    n_tokens = {}
+    for k, v in raw_tokens.items():
+        if not isinstance(k, str) or not isinstance(v, str):
+            return None
+        n_tokens[k] = v
+    raw_idem = st.get("idempotency", [])
+    if not isinstance(raw_idem, list):
+        return None
+    n_idem = {}
+    for rec in raw_idem:
+        if not isinstance(rec, dict):
+            return None
+        for k in ("uid", "key", "method", "path"):
+            if not isinstance(rec.get(k), str):
+                return None
+        kk = (rec["uid"], rec["key"], rec["method"], rec["path"])
+        n_idem[kk] = {"body": copy.deepcopy(rec.get("body")),
+                      "response": copy.deepcopy(rec.get("response"))}
+    raw_splits = st.get("splits", {})
+    if not isinstance(raw_splits, dict):
+        return None
+    raw_settlements = st.get("settlements", {})
+    if not isinstance(raw_settlements, dict):
+        return None
+    raw_ops = st.get("settlement_operator_ids", [])
+    if not isinstance(raw_ops, list) or any(not isinstance(x, str) for x in raw_ops):
+        return None
+    seq = st.get("seq", 0)
+    if not _is_int(seq):
+        return None
+    return {
+        "users_by_id": n_users_by_id,
+        "users_by_email": n_by_email,
+        "users_by_handle": n_by_handle,
+        "tokens": n_tokens,
+        "payments": n_payments,
+        "requests": n_requests,
+        "splits": copy.deepcopy(raw_splits),
+        "settlements": copy.deepcopy(raw_settlements),
+        "authorizations": n_auths,
+        "authorization_ttl_seconds": n_ttl,
+        "idempotency": n_idem,
+        "currency": currency,
+        "minor_units": minor_units,
+        "settlement_operator_ids": list(raw_ops),
+        "seq": seq,
+    }
+
+
 @app.post("/_test/import")
 async def import_state(request: Request):
     body, e = await parse_obj(request)
@@ -1049,82 +1268,28 @@ async def import_state(request: Request):
         return e
     if body.get("track") != "pocketful" or body.get("format_version") != 1 or not isinstance(body.get("state"), dict):
         return err(422, "validation_failed", "bad import")
-    st = body["state"]
     try:
-        if not isinstance(st.get("users"), list):
-            return err(422, "validation_failed", "bad state")
-        # basic sanity
-        n_users_by_id = {}
-        n_by_email = {}
-        n_by_handle = {}
-        for u in st["users"]:
-            if not isinstance(u, dict):
-                return err(422, "validation_failed", "bad user")
-            uid = str(u.get("id", ""))
-            email = u.get("email", "")
-            handle = u.get("handle", "")
-            if not uid or not isinstance(email, str) or not isinstance(handle, str):
-                return err(422, "validation_failed", "bad user fields")
-            n_users_by_id[uid] = {
-                "id": uid, "email": email,
-                "password_hash": str(u.get("password_hash", "")),
-                "display_name": str(u.get("display_name", handle)),
-                "handle": handle, "balance": int(u.get("balance", 0)),
-            }
-            n_by_email[email] = uid
-            n_by_handle[handle] = uid
-        n_payments = {}
-        for p in st.get("payments", []):
-            if not isinstance(p, dict) or "payment_id" not in p:
-                return err(422, "validation_failed", "bad payment")
-            n_payments[str(p["payment_id"])] = p
-        n_requests = {}
-        for r in st.get("requests", []):
-            if not isinstance(r, dict) or "request_id" not in r:
-                return err(422, "validation_failed", "bad request")
-            n_requests[str(r["request_id"])] = r
-        # stage-1 exports omit authorization fields entirely; default them.
-        n_auths = {}
-        for a in st.get("authorizations", []):
-            if not isinstance(a, dict) or "authorization_id" not in a:
-                return err(422, "validation_failed", "bad authorization")
-            aa = dict(a)
-            aa.setdefault("captured_amount", 0)
-            aa.setdefault("payment_id", None)
-            aa.setdefault("payment_ids", [])
-            n_auths[str(a["authorization_id"])] = aa
-        n_ttl = st.get("authorization_ttl_seconds", 600)
-        if isinstance(n_ttl, bool):
-            return err(422, "validation_failed", "bad state")
-        if isinstance(n_ttl, float) and float(n_ttl).is_integer():
-            n_ttl = int(n_ttl)
-        if not isinstance(n_ttl, int) or n_ttl < 1:
-            return err(422, "validation_failed", "bad state")
-        n_tokens = dict(st.get("tokens", {}))
-        n_idem = {}
-        for rec in st.get("idempotency", []):
-            if not isinstance(rec, dict):
-                return err(422, "validation_failed", "bad idempotency")
-            k = (str(rec.get("uid")), str(rec.get("key")), str(rec.get("method")), str(rec.get("path")))
-            n_idem[k] = {"body": rec.get("body"), "response": rec.get("response")}
-        with _lock:
-            _state["users_by_id"] = n_users_by_id
-            _state["users_by_email"] = n_by_email
-            _state["users_by_handle"] = n_by_handle
-            _state["tokens"] = {str(k): str(v) for k, v in n_tokens.items()}
-            _state["payments"] = n_payments
-            _state["requests"] = n_requests
-            _state["splits"] = dict(st.get("splits", {}))
-            _state["settlements"] = dict(st.get("settlements", {}))
-            _state["authorizations"] = n_auths
-            _state["authorization_ttl_seconds"] = n_ttl
-            _state["idempotency"] = n_idem
-            _state["currency"] = st.get("currency", "EUR")
-            _state["minor_units"] = st.get("minor_units", 2)
-            _state["settlement_operator_ids"] = list(st.get("settlement_operator_ids", []))
-            _state["seq"] = int(st.get("seq", 0))
+        nxt = _validate_import_state(body["state"])
     except Exception:
+        nxt = None
+    if nxt is None:
         return err(422, "validation_failed", "bad state")
+    with _lock:
+        _state["users_by_id"] = nxt["users_by_id"]
+        _state["users_by_email"] = nxt["users_by_email"]
+        _state["users_by_handle"] = nxt["users_by_handle"]
+        _state["tokens"] = nxt["tokens"]
+        _state["payments"] = nxt["payments"]
+        _state["requests"] = nxt["requests"]
+        _state["splits"] = nxt["splits"]
+        _state["settlements"] = nxt["settlements"]
+        _state["authorizations"] = nxt["authorizations"]
+        _state["authorization_ttl_seconds"] = nxt["authorization_ttl_seconds"]
+        _state["idempotency"] = nxt["idempotency"]
+        _state["currency"] = nxt["currency"]
+        _state["minor_units"] = nxt["minor_units"]
+        _state["settlement_operator_ids"] = nxt["settlement_operator_ids"]
+        _state["seq"] = nxt["seq"]
     return Response(status_code=204)
 
 

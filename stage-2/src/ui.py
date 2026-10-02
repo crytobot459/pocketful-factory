@@ -597,7 +597,6 @@ def page_authorizations():
     js = """
 window.PFME=null;
 async function refreshAuths(){
-  showErr('authorization-error',null);
   var r;
   try{r=await api('/authorizations?limit=200');}
   catch(e){showErr('authorization-error','Network error, please retry.');return;}
@@ -658,7 +657,7 @@ async function doCapture(id){
   var r;
   try{r=await api('/authorizations/'+encodeURIComponent(id)+'/capture',{method:'POST',key:k.key,body:s});}
   catch(e){showErr('authorization-error','Network error, please retry.');return;}
-  if(r.status===201||r.status===200){await refreshAuths();return;}
+  if(r.status===201||r.status===200){showErr('authorization-error',null);await refreshAuths();return;}
   showErr('authorization-error',await apiErr(r));
   await refreshAuths();
 }
@@ -667,7 +666,7 @@ async function doVoid(id){
   var r;
   try{r=await api('/authorizations/'+encodeURIComponent(id)+'/void',{method:'POST',body:'{}'});}
   catch(e){showErr('authorization-error','Network error, please retry.');return;}
-  if(r.ok){await refreshAuths();return;}
+  if(r.ok){showErr('authorization-error',null);await refreshAuths();return;}
   showErr('authorization-error',await apiErr(r));
   await refreshAuths();
 }
