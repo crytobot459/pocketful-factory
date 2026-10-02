@@ -1,0 +1,17 @@
+# Copy to agent_config.yaml (local only, gitignored). Fill from https://app.band.ai/agents
+# NEVER commit real UUID/key. Gate 4 secret scan fails on committed credentials.
+#
+# Keys are adapter roles; the values are the seats those adapters drive. The seat
+# names are what the room log records and what mandates/ is named after.
+coordinator:
+  seat: factory-architect-df
+  agent_id: "<UUID-factory-architect-df>"
+  api_key: "<KEY-factory-architect-df>"
+implementer:
+  seat: factory-coder-df
+  agent_id: "<UUID-factory-coder-df>"
+  api_key: "<KEY-factory-coder-df>"
+reviewer:
+  seat: factory-tester-df
+  agent_id: "<UUID-factory-tester-df>"
+  api_key: "<KEY-factory-tester-df>"

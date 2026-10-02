@@ -2,6 +2,10 @@
 .env.*
 agent_config.yaml
 agent_config.*.yaml
+# The templates hold placeholders, so they are the files that stand a band up
+# and belong in the repository.
+!.env.example
+!agent_config.example.yaml
 *.pyc
 __pycache__/
 .pytest_cache/

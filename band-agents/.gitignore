@@ -1,3 +1,5 @@
+# Local credentials and the virtualenv. The .example files next to them are
+# templates with placeholders and are committed; see ../.gitignore.
 .env
 agent_config.yaml
 .venv/
