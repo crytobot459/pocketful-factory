@@ -1,0 +1,6 @@
+band-sdk[opencode]
+python-dotenv
+pyyaml
+fastapi
+uvicorn
+httpx
