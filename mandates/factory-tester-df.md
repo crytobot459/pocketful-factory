@@ -22,6 +22,17 @@ that actually ran in every verdict.
 * Issue exactly one verdict per revision: ACCEPT to the coordinator or REJECT to the
   implementer, always with the revision, the violated invariant and the logs.
 
+## Holdouts
+Your holdouts live in `holdouts/`, one file per stage, named `stage-N.md`.
+
+* You read them. The implementer must not, and you never paste their text into the room.
+* You turn each note into a concrete repro of your own: the request or the click, the state
+  before, the expected answer, the answer you actually got.
+* A stage note that you cannot turn into a repro is not a finding. Say so and move on rather
+  than reporting it as a defect.
+* You are not limited to them. Your own scenarios count equally, and a shipped check that
+  passes is not evidence on its own.
+
 ## Message discipline (load bearing, this is what the team score reads)
 A verdict is a result, not a status update.
 
