@@ -235,13 +235,20 @@ def harness_claims() -> list[dict]:
         dict(id="harness.contiguous", source=f"docs/harness-runs/{run_name}/summary.json",
              states=f"highest contiguous stage is {contiguous}",
              near=r"contiguous",
-             any=[re.escape(str(contiguous)), r"\b%d\b" % contiguous]),
+             any=[re.escape(str(contiguous)), r"\b%d\b" % contiguous,
+                  r"\b%s\b" % _word(contiguous)],
+             # This is the figure that drifted: the deck kept saying 3 in a repository
+             # whose own evidence said 4, and the union check could not see it because
+             # three other documents were correct. Every document a judge reads has to
+             # carry it, including the narration, which spells small numbers out.
+             must=DOCS),
 
         dict(id="harness.share", source=f"docs/harness-runs/{run_name}/summary.json",
              states="every folder scored share "
                      + "/".join(str(s) for s in sorted(shares)),
              near=r"share|1\.0",
-             all=[re.escape(str(s)) for s in sorted(shares)]),
+             all=[re.escape(str(s)) for s in sorted(shares)],
+             must=("README.md", "FACTORY.md", "docs/DECK.md")),
 
         dict(id="harness.mode", source=f"docs/harness-runs/{run_name}/summary.json",
              states="the run was in isolated mode, in a clean container",
@@ -278,6 +285,19 @@ def stale_claims() -> list[dict]:
         dict(id="stale.stage_count", source=f"docs/harness-runs/{run_name}/summary.json",
              states=f"the superseded {folders - 1}-stage result appears in no document",
              forbidden=[rf"highest contiguous stage: {folders - 1}\b"]),
+
+        # The deck once sold the reviewer four vetoes the room never issued. This is the
+        # shape of that failure rather than the figure: a document may describe the veto
+        # machinery, but it may not assert that a veto landed. Forbidden on the sentence,
+        # not on the word, because `reject` and `veto` have to stay discussable -- the
+        # honest version of this slide needs both words in it.
+        dict(id="stale.veto_claim", source="room.json",
+             states="no document may claim a rejection the room never issued",
+             forbidden=[r"each became a rejection",
+                        r"rejection with numbers",
+                        r"became a (?:rejection|veto)",
+                        r"\b(?:four|4) (?:rejections|vetoes|REJECT verdicts)\b",
+                        r"reviewer rejected"]),
     ]
 
 
@@ -437,6 +457,23 @@ def check() -> list[str]:
             continue
         if claim.get("forbidden"):
             problems += _check_forbidden(claim, docs)
+            continue
+        # A claim carrying `must` has to hold in each named document, not in one of them.
+        # Without this the check is a union: `docs/DECK.md` can go on saying "highest
+        # contiguous stage: 3" for ever, because `README.md` says 4 and one hit is
+        # enough. That is the same class of bug as a stale figure, one step removed -- the
+        # figure is right somewhere in the repository rather than wrong everywhere, which
+        # is exactly what a judge flipping between the deck and the README would find.
+        required = claim.get("must")
+        if required:
+            for name in required:
+                path = ROOT / name
+                if not path.is_file():
+                    problems.append(f"{claim['id']}: {name} is named as required but is "
+                                    f"not in the tree [{claim['source']}]")
+                elif not _hits(claim, path.read_text(errors="replace").splitlines()):
+                    problems.append(f"{claim['id']}: {name} does not state that "
+                                    f"{claim['states']} [{claim['source']}]")
             continue
         if not any(_hits(claim, text.splitlines()) for _, text in docs):
             where = ""

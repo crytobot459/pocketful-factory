@@ -45,18 +45,26 @@ thing being checked.
 It writes its own scenarios, in notes the implementer is forbidden to read. What it found
 that the published checks never asked for:
 
-| | Scenario | What the shipped checks would have said |
-|---|---|---|
-| stage 1 | a snapshot restored twice duplicates records | fine |
-| stage 2 | a hidden error element survives a successful payment | fine |
-| stage 2 | the split preview disagrees with the server by one minor unit | fine |
-| stage 3 | a statement changes under you while you page through it | fine |
+| | Scenario | What the shipped checks would have said | Stage locked at |
+|---|---|---|---|
+| stage 1 | a snapshot restored twice duplicates records | fine | `35e2fa1` |
+| stage 2 | a hidden error element survives a successful payment | fine | `4004384` |
+| stage 2 | a list reload wipes the error the failed action just set | fine | `4004384` |
+| stage 2 | the split preview disagrees with the server by one minor unit | fine | `4004384` |
+| stage 4 | the refund cap used the original amount, so a correction downward did not tighten it | fine | `b88cb7b` |
+| stage 4 | a batch correction could be applied to a settlement without all of its members | fine | `b88cb7b` |
 
-Each was reported with numbers, and the fixes came back through the room as new commits —
-but as acceptances with findings attached, not as vetoes. In this run the reviewer never
-rejected anything: eight verdicts, all ACCEPT. The veto the factory is built around is still
-untested in this room, and that is stated in FACTORY.md §4 rather than left for a judge to
-discover.
+Six, and each one is a commit whose subject says what changed — `4004384` names three of them
+in a single line. Each was reported with numbers, and the fixes came back through the room as
+new commits — but as acceptances with findings attached, not as vetoes. In this run the
+reviewer never rejected anything: eight verdicts, all ACCEPT. The veto the factory is built
+around is still untested in this room, and that is stated in FACTORY.md §4 rather than left
+for a judge to discover.
+
+**Stage 3 is the honest gap.** Its eleven scenarios ran and all of them passed, so there is
+nothing to list. Two of the four stages' holdout files were also written *after* the verdict
+rather than before it, which is backwards; those files say so at the top, and the fix — a
+reviewer that writes its scenario first and hands it over as the task — is slide 10.
 
 ## 5. What it produced
 
