@@ -127,8 +127,9 @@ submitted before had 482 messages in it, of which the reviewer wrote five, and r
 sentences announcing that the sender was waiting. Every mandate now names the sentences that
 are forbidden outright — "Standing by", "Noted", "Acknowledged", "Quiet", "Holding",
 "Waiting" — and states that silence, not a placeholder, is the correct output. The run in
-`room.json` has 41 seat messages and every one of them carries a revision, a count or a
-verdict.
+`room.json` has 49 seat messages, none of them a filler, and every one of them carries a
+revision, a count or a verdict. Both halves of that are checked, not asserted: `verify_claims.py`
+counts the sentences each mandate forbids and fails if one appears in the room.
 
 **Free tiers only.** Cost to run the whole thing: $0. The seats run on OpenCode's free models
 and a Gemini key, all of which rate-limit. Fallback is declared per seat in
@@ -162,9 +163,10 @@ factory document should save another team from rediscovering.
 - Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T04:20Z, about 25 hours.
 - 113 messages: 49 seat messages (27 architect, 13 coder, 9 tester), the rest tool calls, tool
   results and usage events. Eight verdicts, all ACCEPT; seven stage locks.
-- Tokens the room recorded: 191,555 in / 16,068 out, all attributed to the architect seat. The
+- Tokens the room recorded: 221,701 in / 18,088 out, all attributed to the architect seat. The
   coder and tester seats report usage through their own adapters and their counts are not in the
-  room log, so these are a floor, not a total.
+  room log, so these are a floor, not a total. `python3 demo.py` recomputes this figure live from
+  `room.json`, which is why it and this document used to disagree.
 - Wall-clock overhead that was not work: seat restarts, draining the backlog of an abandoned
   earlier room, and two verifications that ran past the turn deadline and had to be restarted.
 - One human message went into the middle of stage 4, re-posting that stage's dispatch unchanged

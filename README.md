@@ -26,7 +26,9 @@ concurrent writes, and rounding.
 | `demo.py` | narrates the whole thing from the evidence above, in English, in one command |
 | `docs/harness-runs/` | the event harness's own report from the isolated run, kept rather than summarised |
 | `docs/DECK.md`, `docs/DEMO_SCRIPT.md` | the deck, and a recording plan for the video |
+| `docs/EVIDENCE.md` | where every number in these documents comes from, generated and checked |
 | `docs/SUBMIT_CHECKLIST.md` | what to check before publishing, written against the ways this entry went wrong |
+| `verify_claims.py` | re-derives every figure from the evidence and fails if a document disagrees |
 
 ## Results, from the event harness
 
@@ -34,14 +36,28 @@ concurrent writes, and rounding.
 python -m harness run --track pocketful --repo . --all --mode isolated
 ```
 
-| Folder | Claims | share | Overshoot |
-|---|---|---|---|
-| `stage-1/` | stage 1 | 1.0 | none |
-| `stage-2/` | stage 2 | 1.0 | none |
-| `stage-3/` | stage 3 | 1.0 | none |
+| Folder | Claims | share | Overshoot | Shipped checks run against it |
+|---|---|---|---|---|
+| `stage-1/` | stage 1 | 1.0 | none | 147 |
+| `stage-2/` | stage 2 | 1.0 | none | 147 + 35 |
+| `stage-3/` | stage 3 | 1.0 | none | 147 + 35 + 6 |
+| `stage-4/` | stage 4 | 1.0 | none | 147 + 35 + 6 + 5 |
 
-Highest contiguous stage: 3. The event ships only part of each stage's checks, so this is
-directional — see FACTORY.md §2 for what the number is and is not worth.
+Highest contiguous stage: 4. No folder passes the next stage's whole suite, so none of them is
+a later answer filed in the wrong place. The event ships only part of each stage's checks —
+stage 1's 147 is a real sample of the grading suite, stage 3's 6 and stage 4's 5 are close to
+a smoke test. What carries those two is the reviewer's own adversarial work in
+[`holdouts/`](holdouts/), not the six and five. See FACTORY.md §2 for what the number is and is
+not worth.
+
+The run is kept rather than summarised: [`docs/harness-runs/`](docs/harness-runs/) has the
+`summary.json`, four `report.json` files and every per-suite log.
+
+**Every number in this file and in FACTORY.md is checked against the evidence by
+[`verify_claims.py`](verify_claims.py), which CI runs.** It extracts each figure from
+`room.json`, the harness report and the git history, then fails if a document says anything
+else. [`docs/EVIDENCE.md`](docs/EVIDENCE.md) is the generated table of where each one comes
+from. Run `python3 verify_claims.py` yourself: if it and this file ever disagree, it is right.
 
 ## Hear it, in one command
 

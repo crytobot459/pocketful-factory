@@ -2,6 +2,26 @@ name: ci
 on: [push, pull_request]
 
 jobs:
+  # Every figure in README.md and FACTORY.md, against the evidence that produced it.
+  # The room does not change, so a wrong number in a document can only mean the
+  # document was not updated -- and this repository has shipped three of those. The
+  # checker exits non-zero, which also rejects figures the repository has already
+  # retracted, because a stale number can sit next to a correct one.
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0        # the stage-lock claims read git log
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 verify_claims.py
+      - name: Regenerate the evidence table and fail if it moved
+        run: |
+          python3 verify_claims.py --markdown docs/EVIDENCE.md
+          git diff --exit-code docs/EVIDENCE.md
+
   stages:
     runs-on: ubuntu-latest
     strategy:

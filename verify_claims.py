@@ -57,6 +57,31 @@ def _role(name: str) -> str:
     return name.split("-")[-2] if name.count("-") > 1 else name
 
 
+def _word(n: int) -> str:
+    """`7` -> `seven`. Documents write small counts out, and a checker that only accepts
+    digits fails a document for being well written."""
+    words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six",
+             7: "seven", 8: "eight", 9: "nine", 10: "ten", 11: "eleven", 12: "twelve"}
+    return words.get(n, str(n))
+
+
+def _locks_mentioned(data: dict) -> int:
+    """How many distinct revisions the room announces as locked.
+
+    A stage lock is the coordinator committing a revision as that stage's answer, so it is
+    counted as distinct short hashes said in the same message as the word "lock". More
+    than the number of stages is expected: a stage can be re-locked after a defect.
+    """
+    locks: set[str] = set()
+    for m in data.get("messages") or []:
+        if m.get("messageType") != "text":
+            continue
+        content = str(m.get("content", ""))
+        if re.search(r"\block", content, re.I):
+            locks.update(re.findall(r"\b[0-9a-f]{7}\b", content))
+    return len(locks)
+
+
 # --- evidence ---------------------------------------------------------------
 
 def _room() -> dict:
@@ -173,6 +198,11 @@ def room_claims() -> list[dict]:
         dict(id="room.window", source="room.json",
              states="the room window runs 2026-10-02 to 2026-10-03, about 25 hours",
              near=r"2026-10", any=[r"2026-10-0[23]"]),
+
+        dict(id="room.locks", source="room.json",
+             states=f"{_locks_mentioned(data)} stage locks are announced in the room",
+             near=r"lock", any=[rf"\b(?:{_locks_mentioned(data)}|{_word(_locks_mentioned(data))}) "
+                                r"stage locks?\b"]),
     ]
 
 
@@ -356,7 +386,7 @@ def _check_forbidden(claim: dict, docs: list[tuple[pathlib.Path, str]]) -> list[
     for path, text in docs:
         for n, line in enumerate(text.splitlines(), 1):
             for pattern in claim["forbidden"]:
-                if re.search(pattern, line):
+                if re.search(pattern, line, re.I):
                     found.append(f"{claim['id']}: {path.name}:{n} still says {pattern!r}; "
                                  f"{claim['states']} [{claim['source']}]")
     return found
