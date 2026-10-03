@@ -103,6 +103,25 @@ gaps were found by it and fixed by the implementer — but it found them by repo
 with findings attached rather than by vetoing. A future run should veto at least once so the
 room shows the veto actually stopping something.
 
+**Every one of those scenarios is now executable.** `holdouts/run_scenarios.py` runs them
+against a live service, named after the note each came from, and prints expected against actual:
+
+```bash
+python3 holdouts/run_scenarios.py --base-url http://127.0.0.1:8080 --stage 4
+```
+
+CI runs it against all three stages. Writing them down was the first half of making them
+countable; being able to re-run them without the reviewer in the room is the second half.
+
+**They were also checked against every revision in this repository's history, and that found
+nothing to reject.** The claim in the room is that `ed2a419` failed the snapshot-restored-twice
+check and `35e2fa1` fixed it. Re-running that scenario against both produces identical results,
+so the difference between them is not observable through the API: it is Python object aliasing
+inside the process, which no request can reach. Every stage folder also passes every shipped
+check, and the reviewer's own stage-3 and stage-4 scenarios pass against the current build. So
+there is no honest rejection to be had from this run, and inventing one would be worth nothing —
+which is also what the event says about manufactured conflict.
+
 **Explicit message discipline, because the first attempt at this failed.** The run this factory
 submitted before had 482 messages in it, of which the reviewer wrote five, and roughly half were
 sentences announcing that the sender was waiting. Every mandate now names the sentences that

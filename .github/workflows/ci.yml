@@ -48,3 +48,31 @@ jobs:
       - run: pip install -r stage-${{ matrix.stage }}/requirements.txt
       - run: python3 -c "import src.app"
         working-directory: stage-${{ matrix.stage }}
+
+  # The reviewer's own scenarios, re-run against every build. These are not the
+  # event's checks: they are the notes the reviewer wrote, made executable so
+  # that nobody has to take a verdict's word for it.
+  scenarios:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [1, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r stage-${{ matrix.stage }}/requirements.txt
+
+      - name: Serve stage-${{ matrix.stage }}
+        run: |
+          docker build -t scenario-stage${{ matrix.stage }} ./stage-${{ matrix.stage }}
+          docker run -d --name pf -p 8080:8080 -e PORT=8080 scenario-stage${{ matrix.stage }}
+          for i in $(seq 1 60); do
+            curl -sf http://127.0.0.1:8080/health >/dev/null && break
+            sleep 1
+          done
+
+      - name: Run the reviewer's scenarios
+        run: python3 holdouts/run_scenarios.py --base-url http://127.0.0.1:8080 --stage ${{ matrix.stage }}
