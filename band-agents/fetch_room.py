@@ -19,6 +19,48 @@ ROOM = os.getenv("ROOM_ID", "affa9999-88af-4bef-b731-55957ba9af33")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "room.json")
 
 
+def page_meta(response) -> dict:
+    """`metadata` arrives as a flat query string, not as an object."""
+    meta = response.metadata
+    if isinstance(meta, dict):
+        return meta
+    out = {}
+    for part in str(meta or "").split():
+        if "=" in part:
+            key, _, value = part.partition("=")
+            out[key] = value
+    return out
+
+
+async def fetch_all(client) -> list:
+    """Every message in the room, in order.
+
+    The endpoint pages, and it will not tell you the room is longer than one
+    page unless you ask in the way that reports it: `limit` stops at 100 and
+    hands back a cursor, while `page`/`page_size` also reports `total_count`
+    and `total_pages`. A room long enough to need a second page therefore looks
+    complete to anything that reads one page, which is how this saved a room
+    that was missing its own final revisions.
+
+    Deduplicate by id as well, since a message can appear on the boundary.
+    """
+    seen: dict[str, object] = {}
+    page = 1
+    while True:
+        response = await client.agent_api_context.get_agent_chat_context(
+            ROOM, page=page, page_size=100, request_options=DEFAULT_REQUEST_OPTIONS,
+        )
+        batch = response.data or []
+        for m in batch:
+            seen[getattr(m, "id", "") or str(len(seen))] = m
+        if not batch or page_meta(response).get("has_more") != "True":
+            break
+        page += 1
+        if page > 50:          # a room cannot plausibly be longer; stop rather than spin
+            break
+    return sorted(seen.values(), key=lambda m: str(getattr(m, "inserted_at", "")))
+
+
 async def main() -> None:
     load_dotenv()
     cfg = yaml.safe_load(open("agent_config.yaml"))
@@ -27,24 +69,8 @@ async def main() -> None:
         base_url=os.getenv("BAND_REST_URL", "https://app.band.ai").rstrip("/"),
     )
     try:
-        # The context endpoint caps a page at 100 and returns the oldest page by
-        # default, so a room longer than that silently truncates at the front of
-        # the run. Walk the pages with a cursor until one comes back short.
-        raw, cursor = [], None
-        while True:
-            page = await client.agent_api_context.get_agent_chat_context(
-                ROOM, limit=100, cursor=cursor, request_options=DEFAULT_REQUEST_OPTIONS,
-            )
-            batch = page.data or []
-            raw.extend(batch)
-            if len(batch) < 100:
-                break
-            nxt = getattr(page, "next_cursor", None) or getattr(page, "cursor", None)
-            if not nxt or nxt == cursor:
-                break
-            cursor = nxt
         msgs = []
-        for m in raw:
+        for m in await fetch_all(client):
             ts = getattr(m, "inserted_at", "")
             msgs.append({
                 "id": getattr(m, "id", ""),
