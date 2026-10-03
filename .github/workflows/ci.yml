@@ -1,13 +1,50 @@
 name: ci
 on: [push, pull_request]
+
 jobs:
-  test:
+  stages:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      # The way a judge builds a folder: from its Dockerfile, with nothing else.
+      - name: Build stage-${{ matrix.stage }}
+        run: docker build -t pocketful-stage${{ matrix.stage }} ./stage-${{ matrix.stage }}
+
+      - name: Serve and check /health
+        run: |
+          docker run -d --name pf -p 8080:8080 -e PORT=8080 pocketful-stage${{ matrix.stage }}
+          for i in $(seq 1 60); do
+            if curl -sf http://127.0.0.1:8080/health | grep -q '"status":"ok"'; then
+              echo "healthy after ${i}s"
+              docker logs pf
+              docker rm -f pf
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "did not become healthy within 60s"
+          docker logs pf
+          docker rm -f pf
+          exit 1
+
+  # Each stage folder must import cleanly on its own, since a judge only talks
+  # to it over HTTP but a broken import means the image built from nothing.
+  imports:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -r stage-1/requirements.txt
-      - run: python3 -c "import src.app" 
-        working-directory: stage-1
+      - run: pip install -r stage-${{ matrix.stage }}/requirements.txt
+      - run: python3 -c "import src.app"
+        working-directory: stage-${{ matrix.stage }}
