@@ -21,9 +21,16 @@
       "overshoot": null,
       "highest_contiguous": 3,
       "report": "stage-3/report.json"
+    },
+    "4": {
+      "claimed": true,
+      "share": 1.0,
+      "overshoot": null,
+      "highest_contiguous": 4,
+      "report": "stage-4/report.json"
     }
   },
-  "run_id": "1790990649",
+  "run_id": "1791001460",
   "mode": "isolated",
   "preview": true
 }

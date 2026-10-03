@@ -3,18 +3,20 @@
   "track": "pocketful",
   "stages": {
     "1": "pass",
-    "2": "pass"
+    "2": "pass",
+    "3": "pass",
+    "4": "pass"
   },
-  "highest_contiguous": 2,
-  "started_at": "2026-10-03T04:25:18.240372+00:00",
-  "finished_at": "2026-10-03T04:26:42.844218+00:00",
+  "highest_contiguous": 4,
+  "started_at": "2026-10-03T04:28:30.656189+00:00",
+  "finished_at": "2026-10-03T04:30:35.977587+00:00",
   "schema_version": 2,
-  "run_id": "9e66f72490a94e8e9e1afb6fe89a75e9",
+  "run_id": "28182b87d5e0400cb5610030e47a6c44",
   "mode": "isolated",
   "provenance": "working-tree",
   "state": "completed",
   "pytest_args": [],
-  "suite_digest": "2b10528cac13c5e4078394267e35194eb41a35721b25e868131c027e33ed6c1c",
+  "suite_digest": "20ed03f371228cf06bbcd84986abf34f4b84d12abfac2e2164ff10b5d1e41bf6",
   "checks": {
     "1": {
       "collected": 147,
@@ -65,10 +67,40 @@
           "total": 25
         }
       }
+    },
+    "3": {
+      "collected": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_3/test_sample.py": {
+          "passed": 6,
+          "total": 6
+        }
+      }
+    },
+    "4": {
+      "collected": 5,
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_4/test_sample.py": {
+          "passed": 5,
+          "total": 5
+        }
+      }
     }
   },
   "overshoot": null,
-  "claimed_stage": "2",
+  "claimed_stage": "4",
   "share": 1.0,
   "upgrade_sources": {
     "2": {
@@ -77,6 +109,10 @@
     },
     "3": {
       "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-2",
+      "revision": "c5e1f7a4884ffba830af212031cddf44042268f3"
+    },
+    "4": {
+      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-3",
       "revision": "c5e1f7a4884ffba830af212031cddf44042268f3"
     }
   }
