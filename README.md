@@ -37,6 +37,27 @@ concurrent writes, and rounding.
 | `verify_claims.py` | re-derives every figure from the evidence and fails if a document disagrees |
 | `tools/shoot_ui.py` | re-takes the screenshots and measures layout, labels and focus rings |
 
+### Seeing the room yourself
+
+`room.json` is the evidence, and it is committed so you never need an account. If you do
+have a BAND account, the room itself is at
+
+```
+https://app.band.ai/sessions/affa9999-88af-4bef-b731-55957ba9af33
+```
+
+(`/sessions/<id>`, not `/rooms/<id>` -- the other one redirects to the dashboard.) Two
+messages are worth looking for: `ACCEPT b88cb7b stage-4`, where the reviewer verifies that
+exact revision and lists what it ran, and `Stage-4 LOCKED at revision b88cb7b` a few
+minutes later, where the architect locks it. Those are the last two things the band did.
+
+It does not appear in the BAND Desktop sidebar, and that is not a missing export: the room
+was created through the agent API by the adapters in `band-agents/`, and the account is not
+its human owner -- `jam room participants` lists `factory-architect-df` as owner -- so the
+human-API room list leaves it out and `jam room rename` answers 403. It reads fine over
+`jam room messages`, which is how the export was taken.
+
+
 ## Results, from the event harness
 
 ```

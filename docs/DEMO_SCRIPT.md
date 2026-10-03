@@ -17,16 +17,25 @@ Terminal, nothing else on screen.
 
 ## 0:20 — The room, before anything is built
 
-BAND Desktop (jam). Open the room the band worked in and scroll it.
-
-Point at three things and say them:
-
-- the seat names: `factory-architect-df`, `factory-coder-df`, `factory-tester-df`
-- a handoff, where the coordinator names a task and the revision to verify
-- a verdict, which names a revision and carries numbers
+The room itself, in BAND. Open it and scroll it.
 
 > This is not a chat log. Every message either carries a revision, a count or a decision. The
 > run before this one had 482 messages and the reviewer wrote five of them.
+
+**Getting the room on screen.** It is at
+`https://app.band.ai/sessions/affa9999-88af-4bef-b731-55957ba9af33` — `/sessions/<id>`, not
+`/rooms/<id>`, which redirects to the dashboard and looks like a permissions problem rather
+than a wrong URL. Sign in to BAND first if it asks. `record_demo.sh` opens it for you.
+
+It will not be in BAND Desktop's sidebar, and that is expected rather than a missing export:
+the room was created through the agent API by the adapters, the account is not its human
+owner (`jam room rename` answers 403), so the human-API room list leaves it out. Say that on
+camera if you show the sidebar — it is a better answer than a room that is not there.
+
+**The two messages to scroll to, and they are the last two things the band did:**
+
+- `ACCEPT b88cb7b stage-4` — the reviewer, at that exact revision, listing what it ran
+- `Stage-4 LOCKED at revision b88cb7b` — the architect, minutes later
 
 ## 1:00 — A handoff, start to finish
 
@@ -132,9 +141,10 @@ Terminal, `git log --oneline`.
   scenarios and then `verify_claims.py`, and starts `screencapture`. `--serve-only` skips
   the windows, `--no-capture` skips the recorder. Every shot below is one of its steps, in
   that order, so the recording is reproducible rather than retyped.
-- The room shot is BAND Desktop (`/Applications/Jam.app`), not a browser tab. The event
-  disqualifies a video without the BAND Desktop room recording, and `app.band.ai` shows the
-  same room but is not the thing the rule names.
+- The room shot is the room itself, at `/sessions/<id>`. BAND Desktop (`/Applications/Jam.app`)
+  does not list it, for the reason above, so open it in the browser and say so. The event
+  disqualifies a video without the room recording; the room is what is being recorded, and
+  `room.json` in the repository is the same transcript.
 - Record at 1920×1080 so the terminal text is legible when scaled down.
 - `demo.py` needs no key. Speech is skipped silently if `edge-tts` is missing; install it with
   `pip install edge-tts` to have the narration.
