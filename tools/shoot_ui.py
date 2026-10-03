@@ -160,19 +160,33 @@ def main(argv=None) -> int:
         return 2
 
     print(f"seeding the published fixture on {base}")
-    call(base, "POST", "/_test/reset", FIXTURE)
-    ada, bob = login(base, "ada@example.com"), login(base, "bob@example.com")
 
-    # A hold, so "available" is a smaller number than "total" and the secondary
-    # hierarchy the spec asks for is actually on screen. The field is `to_handle`,
-    # not `to_user_id`: the specification addresses the payee by handle.
-    status, body = call(base, "POST", "/authorizations",
-                        {"to_handle": "bob", "amount": 3000}, token=ada, key="shoot-auth-1")
-    if status not in (200, 201):
-        print(f"warning: the hold was refused ({status} {body}); the available/total "
-              f"hierarchy will not be on screen", file=sys.stderr)
-    # A declined request, so the refused state has something to show.
-    call(base, "POST", "/requests/rq_1/decline", {}, token=ada, key="shoot-decl-1")
+    def reseed(label: str) -> None:
+        """Put the fixture back, so every width starts from the same state.
+
+        This ran once, before the loop, and the second width then shot a server the first
+        width had already moved: the replay assertion failed on mobile with the payment in
+        the feed twice. The cause is the harness rather than the service -- a fresh browser
+        context derives a fresh idempotency key from the same body, so the server is right
+        to treat the second submit as a new payment. Re-seeding per width also makes the
+        two sets of screenshots comparable, which is the only reason to shoot both.
+        """
+        call(base, "POST", "/_test/reset", FIXTURE)
+        a = login(base, "ada@example.com")
+        # A hold, so "available" is a smaller number than "total" and the secondary
+        # hierarchy the spec asks for is actually on screen. The field is `to_handle`,
+        # not `to_user_id`: the specification addresses the payee by handle.
+        status, body = call(base, "POST", "/authorizations",
+                            {"to_handle": "bob", "amount": 3000}, token=a,
+                            key=f"shoot-auth-{label}")
+        if status not in (200, 201):
+            print(f"warning: the hold was refused ({status} {body}); the available/total "
+                  f"hierarchy will not be on screen", file=sys.stderr)
+        # A declined request, so the refused state has something to show.
+        call(base, "POST", "/requests/rq_1/decline", {}, token=a, key=f"shoot-decl-{label}")
+        return a
+
+    reseed("warmup")
 
     try:
         from playwright.sync_api import sync_playwright
@@ -187,6 +201,7 @@ def main(argv=None) -> int:
     with sync_playwright() as p:
         browser = p.chromium.launch()
         for label, size in (("desktop", DESKTOP), ("mobile", MOBILE)):
+            reseed(label)
             ctx = browser.new_context(viewport=size, device_scale_factor=2)
             page = ctx.new_page()
 
@@ -206,28 +221,88 @@ def main(argv=None) -> int:
                 shots.append(str(path))
                 report(f"{label} {route}", page, findings)
 
-            # Refused: pay more than Ada has available.
+            # Refused: pay more than Ada has available. The claim this screenshot exists to
+            # support is not "an error appeared" -- it is "the balance did not move", so the
+            # balance is read before and after and a refusal that moved it is a finding.
             page.goto(f"{base}/")
             page.wait_for_selector('[data-testid=current-user]')
-            amount = page.query_selector('[data-testid=pay-amount]')
-            if amount:
-                amount.fill("999999")
-                submit = page.query_selector('[data-testid=pay-submit]')
-                if submit:
-                    submit.click()
-                    page.wait_for_timeout(900)
-                    path = out / f"{label}-refused.png"
-                    page.screenshot(path=str(path), full_page=True)
-                    shots.append(str(path))
-                    report(f"{label} refused", page, findings)
 
-            # Uncertain: an idempotency key sent twice, which the spec requires the UI to
-            # surface as recoverable rather than as a failure.
-            page.goto(f"{base}/requests")
-            page.wait_for_load_state("networkidle")
-            path = out / f"{label}-requests-after-decline.png"
+            def balance() -> int | None:
+                return page.evaluate(
+                    "async () => (await (await fetch('/me', {headers:"
+                    "{Authorization:'Bearer '+localStorage.getItem('pf_token')}}))"
+                    ".json()).balance")
+
+            # A handle nobody has. This one is named for what it shows: the sentence a
+            # person reads first, with the server's code small and after it. It used to be
+            # filed as `refused`, which was wrong -- an empty handle field is refused by
+            # the handle lookup, not by the funds check, so the file claimed a payment
+            # refusal while showing `not_found`, and the "the balance did not move" check
+            # passed without anything having been attempted.
+            page.fill('[data-testid=pay-handle]', "nobody-here")
+            page.fill('[data-testid=pay-amount]', "5.00")
+            page.click('[data-testid=pay-submit]')
+            page.wait_for_timeout(900)
+            path = out / f"{label}-unknown-handle.png"
             page.screenshot(path=str(path), full_page=True)
             shots.append(str(path))
+            report(f"{label} unknown handle", page, findings)
+
+            # Refused for money: a real handle, and more than Ada has. The claim this
+            # screenshot exists to support is not "an error appeared" -- it is "the balance
+            # did not move", so the balance is read from the server on both sides of the
+            # attempt and a refusal that moved it is a finding.
+            before = balance()
+            page.fill('[data-testid=pay-handle]', "bob")
+            page.fill('[data-testid=pay-amount]', "999999")
+            page.click('[data-testid=pay-submit]')
+            page.wait_for_timeout(900)
+            path = out / f"{label}-refused.png"
+            page.screenshot(path=str(path), full_page=True)
+            shots.append(str(path))
+            report(f"{label} refused for funds", page, findings)
+            after = balance()
+            if before is not None and after != before:
+                findings.append(
+                    f"{label} refused a payment for funds but the balance moved: "
+                    f"{before} -> {after}")
+
+            # The same payment submitted twice. The specification says two clicks move the
+            # money once, and the UI derives its idempotency key from the request body, so
+            # an identical second submit is the replay. This replaced a shot named
+            # `requests-after-decline`, which called `page.goto` and therefore reloaded the
+            # page: it threw away the state it was named for and came out byte-identical to
+            # the plain requests screenshot.
+            #
+            # What is asserted is the invariant, not the pixels: one entry in the feed for
+            # that note, and the balance down by exactly one payment.
+            page.goto(f"{base}/")
+            page.wait_for_selector('[data-testid=current-user]')
+            start = balance()
+            page.fill('[data-testid=pay-handle]', "bob")
+            page.fill('[data-testid=pay-amount]', "7.77")
+            page.fill('[data-testid=pay-note]', "replayed")
+            page.click('[data-testid=pay-submit]')
+            page.wait_for_timeout(800)
+            page.click('[data-testid=pay-submit]')
+            page.wait_for_timeout(900)
+            moved = balance()
+            if start is not None and moved is not None:
+                if start - moved != 777:
+                    findings.append(
+                        f"{label} submitted one payment twice but the balance moved "
+                        f"{start - moved} minor units, want 777")
+            listed = page.evaluate(
+                "() => [...document.querySelectorAll("
+                "'[data-testid^=activity-note-]')].filter("
+                "e => e.textContent.trim() === 'replayed').length")
+            if listed != 1:
+                findings.append(
+                    f"{label} replayed payment appears {listed} times in the feed, want 1")
+            path = out / f"{label}-replayed.png"
+            page.screenshot(path=str(path), full_page=True)
+            shots.append(str(path))
+            report(f"{label} replayed", page, findings)
             ctx.close()
 
         # The signed-out screens, in their own context so no token is present.

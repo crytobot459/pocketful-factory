@@ -137,11 +137,28 @@ looking at anything. So it is checked by looking at it:
 | ![The wallet screen, signed in, with a hold on part of the balance](docs/screenshots/desktop-home.png) | ![The same screen at 375 pixels](docs/screenshots/mobile-home.png) |
 | Available funds are the largest value on the page and total and held are secondary — the hierarchy the specification asks for once holds exist | The same at a 375 CSS-pixel viewport, with no horizontal scrolling |
 
-More in [`docs/screenshots/`](docs/screenshots/): the requests list, the split form, a
-refused payment, the login error, signup, and both widths of each. `tools/shoot_ui.py`
-re-takes all of them and, while it is there, measures what a screenshot cannot show —
-whether anything overflows horizontally, whether every input has a label, and whether
-every control a keyboard reaches has a visible focus ring:
+More in [`docs/screenshots/`](docs/screenshots/), fifteen of them and every one distinct:
+
+| | desktop | 375px |
+|---|---|---|
+| the wallet, a hold on part of the balance | [`desktop-home.png`](docs/screenshots/desktop-home.png) | [`mobile-home.png`](docs/screenshots/mobile-home.png) |
+| **a payment refused for funds — and the balance did not move** | [`desktop-refused.png`](docs/screenshots/desktop-refused.png) | [`mobile-refused.png`](docs/screenshots/mobile-refused.png) |
+| **the same payment submitted twice — one entry in the feed, money moved once** | [`desktop-replayed.png`](docs/screenshots/desktop-replayed.png) | [`mobile-replayed.png`](docs/screenshots/mobile-replayed.png) |
+| a handle nobody has: the sentence a person reads, then the server's code | [`desktop-unknown-handle.png`](docs/screenshots/desktop-unknown-handle.png) | [`mobile-unknown-handle.png`](docs/screenshots/mobile-unknown-handle.png) |
+| the requests list | [`desktop-requests.png`](docs/screenshots/desktop-requests.png) | [`mobile-requests.png`](docs/screenshots/mobile-requests.png) |
+| the split form | [`desktop-split.png`](docs/screenshots/desktop-split.png) | [`mobile-split.png`](docs/screenshots/mobile-split.png) |
+
+Plus the signed-out screens: [`desktop-login.png`](docs/screenshots/desktop-login.png),
+[`desktop-signup.png`](docs/screenshots/desktop-signup.png) and
+[`desktop-login-error.png`](docs/screenshots/desktop-login-error.png).
+
+The three bolded rows are the ones that assert something rather than illustrate it.
+`tools/shoot_ui.py` reads the balance from the server on both sides of the refused payment
+and fails if it moved, and it counts the feed entries for the replayed payment and fails
+unless there is exactly one — so those two pictures are backed by a check, not by a
+person's word. It also re-takes all fifteen and, while it is there, measures what a
+screenshot cannot show: whether anything overflows horizontally, whether every input has a
+label, and whether every control a keyboard reaches has a visible focus ring.
 
 ```bash
 cd stage-4 && PORT=8080 python3 -m src.app &
@@ -153,7 +170,17 @@ server's error code — `not_found` — to somebody who had typed a handle that 
 exist. The specification asks for people first and technical identifiers "only where they
 help the user", so the banner now leads with a sentence and carries the code in small
 muted type beside it: a person reads what happened, and someone reporting the problem can
-quote the code instead of describing a screenshot.
+quote the code instead of describing a screenshot. `desktop-unknown-handle.png` is that
+banner.
+
+Running it also found two faults in this file's own output, which is the argument for
+having assertions in it rather than a camera. The shot called `refused` was filling the
+amount and leaving the handle empty, so the server refused the *handle lookup* and the
+picture showed `not_found` while claiming to show a refused payment — and the "the balance
+did not move" reading passed without anything having been attempted. And a shot called
+`requests-after-decline` reloaded the page, threw away the state it was named for, and came
+out byte-identical to the plain requests screenshot. Both are fixed above, and the
+fixtures are re-seeded per width so the two sets are comparable.
 
 ## Standing the factory up
 
