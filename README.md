@@ -21,10 +21,12 @@ concurrent writes, and rounding.
 | `mandates/` | one file per seat, named after the seat, opening with the harness and model that seat runs |
 | `room.json` | the room, downloaded in full: every message, tool call and verdict |
 | `stage-N/` | one folder per stage: `Dockerfile`, `RUN.md`, source. Each builds on its own and passes every earlier suite |
-| `holdouts/` | the reviewer's private scenarios, one file per stage. The implementer is forbidden to read them |
+| `holdouts/` | the reviewer's scenarios, plus `run_scenarios.py`, which runs them against a live service |
 | `band-agents/` | the three thin adapters that connect each seat to the room |
+| `demo.py` | narrates the whole thing from the evidence above, in English, in one command |
 | `docs/harness-runs/` | the event harness's own report from the isolated run, kept rather than summarised |
-| `docs/templates/` | submission, deck and script skeletons. Outlines, not this factory's story |
+| `docs/DECK.md`, `docs/DEMO_SCRIPT.md` | the deck, and a recording plan for the video |
+| `docs/SUBMIT_CHECKLIST.md` | what to check before publishing, written against the ways this entry went wrong |
 
 ## Results, from the event harness
 
@@ -41,12 +43,28 @@ python -m harness run --track pocketful --repo . --all --mode isolated
 Highest contiguous stage: 3. The event ships only part of each stage's checks, so this is
 directional — see FACTORY.md §2 for what the number is and is not worth.
 
+## Hear it, in one command
+
+```bash
+pip install edge-tts        # optional; the demo runs without it
+python3 demo.py
+```
+
+That reads this repository's own evidence out loud, in English, and prints it at the same
+time: the seats and their models, the room's message count and how it splits across them, the
+stages and the revision each locked at, the verdicts, the token usage, and what the event's
+harness said. Every figure it speaks is parsed out of `room.json`, the git history and
+`docs/harness-runs/`, so the narration cannot drift away from what is in the repository.
+
+`--no-speak` prints without speaking. `--save DIR` keeps the audio as numbered files, which is
+what the video edit wants.
+
 ## Running a stage yourself
 
 No account, no keys, no Docker needed for a quick look:
 
 ```bash
-cd stage-3
+cd stage-4
 pip install -r requirements.txt
 PORT=8080 python3 -m src.app
 curl -s http://127.0.0.1:8080/health        # {"status":"ok"}
@@ -58,9 +76,20 @@ Then open <http://127.0.0.1:8080/>. Sign in as `ada@example.com` with the passwo
 To build it the way a judge does:
 
 ```bash
-docker build -t pocketful-stage3 ./stage-3
-docker run --rm -p 8080:8080 -e PORT=8080 pocketful-stage3
+docker build -t pocketful-stage4 ./stage-4
+docker run --rm -p 8080:8080 -e PORT=8080 pocketful-stage4
 ```
+
+## Re-running the reviewer's scenarios
+
+The notes in `holdouts/` are executable, so the verdicts do not have to be taken on trust:
+
+```bash
+python3 holdouts/run_scenarios.py --base-url http://127.0.0.1:8080 --stage 4
+```
+
+Each check prints what it expected against what it read, and the exit status is 0 only when
+every one of them passed. CI runs the stage-1, stage-3 and stage-4 sets against every build.
 
 ## Standing the factory up
 
