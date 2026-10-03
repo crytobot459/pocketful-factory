@@ -9,19 +9,19 @@ number below disagrees with a document, the document is wrong.
 
 | Claim | What the evidence says | Source | In the documents |
 |---|---|---|---|
-| `room.total` | the room holds 113 messages | `room.json` | `FACTORY.md:155`, `DEMO_SCRIPT.md:43` |
-| `room.scope` | the download is a full session, not a filtered one (scope "full") | `room.json` | `README.md:18` |
+| `room.total` | the room holds 121 messages | `room.json` | `FACTORY.md:176`, `DEMO_SCRIPT.md:43` |
+| `room.scope` | the export runs to the end of the room: it carries the final stage lock | `room.json` | `README.md:27`, `FACTORY.md:169` |
 | `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:162`, `FACTORY.md:13` |
-| `room.text` | 49 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
-| `room.byseat` | the split across seats is 27 from the architect, 13 from the coder, 9 from the tester | `room.json` | `FACTORY.md:169` |
-| `room.accept` | 8 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:60`, `DEMO_SCRIPT.md:44` |
+| `room.text` | 52 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
+| `room.byseat` | the split across seats is 28 from the architect, 13 from the coder, 11 from the tester | `room.json` | `FACTORY.md:176` |
+| `room.accept` | 10 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:60`, `DEMO_SCRIPT.md:44` |
 | `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:60`, `DEMO_SCRIPT.md:66` |
 | `room.filler` | 0 of the seat messages is a filler message | `room.json` | `FACTORY.md:130`, `DEMO_SCRIPT.md:28` |
-| `room.tokens_in` | 221,701 input tokens | `room.json` | `FACTORY.md:171` |
-| `room.tokens_out` | 18,088 output tokens | `room.json` | `FACTORY.md:171` |
-| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:173` |
+| `room.tokens_in` | 294,064 input tokens | `room.json` | `FACTORY.md:178` |
+| `room.tokens_out` | 18,549 output tokens | `room.json` | `FACTORY.md:178` |
+| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:180` |
 | `room.window` | the room window runs 2026-10-02 to 2026-10-03, about 25 hours | `room.json` | `FACTORY.md:168` |
-| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:170` |
+| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:177` |
 | `harness.folders` | 4 stage folders were built and probed | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48` |
 | `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:53`, `FACTORY.md:50`, `DECK.md:90`, `DEMO_SCRIPT.md:104` |
 | `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48`, `FACTORY.md:46`, `DECK.md:86` |
@@ -38,6 +38,12 @@ number below disagrees with a document, the document is wrong.
 | `stale.veto_claim` | no document may claim a rejection the room never issued | `room.json` | clear |
 | `stale.stage4_findings` | the stage-4 finding count is two, and stage 3 found nothing | `FACTORY.md section 4` | clear |
 | `stale.stage3_finding` | no finding is attributed to stage 3, which locked in one commit | `FACTORY.md section 4` | clear |
+| `stale.room_total` | the truncated export's message count appears in no document | `the re-exported room.json` | clear |
+| `stale.seat_texts` | the truncated export's seat-message count appears in no document | `the re-exported room.json` | clear |
+| `stale.byseat` | the truncated export's per-seat split appears in no document | `the re-exported room.json` | clear |
+| `stale.verdict_count` | the truncated export's verdict count appears in no document | `the re-exported room.json` | clear |
+| `stale.tokens` | the truncated export's token totals appear in no document | `the re-exported room.json` | clear |
+| `stale.room_window` | the truncated export's end-of-run timestamp appears in no document | `the re-exported room.json` | clear |
 
-29 claim(s). Sources: `room.json` (the seat log as downloaded),
+35 claim(s). Sources: `room.json` (the seat log as downloaded),
 `docs/harness-runs/*/summary.json` (the event's own harness), and `git log`.

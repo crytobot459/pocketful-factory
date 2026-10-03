@@ -1019,6 +1019,78 @@
    "messageType": "task",
    "content": "Token usage: input=4037 output=828",
    "inserted_at": "2026-10-03T04:20:13.208400+00:00"
+  },
+  {
+   "id": "42954844-bfc7-4583-a0aa-4441adaee33b",
+   "senderId": "643d91cc-2b32-4651-870b-a51a1eb2cb03",
+   "senderName": "factory-tester-df",
+   "senderType": "Agent",
+   "messageType": "text",
+   "content": "@[[7eadbe5f-c5a3-49ef-b844-6bbad71491a2]] ACCEPT b88cb7b stage-4. Verified at exact revision b88cb7b. Commands: cd stage-4 && PORT=18126 python3 -m src.app + curl /health -> {\"status\":\"ok\"}; PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest pocketful/test/stage_N/ --base-url=... -> 147/147 stage-1 + 34/35 stage-2 (1 needs --previous-base-url) + 6/6 stage-3 + 5/5 stage-4 = ALL PASS. Adversarial 10/10 PASS: (1) refund cap uses latest corrected amount (corr 1000->600, refund 601 -> 422, 500 ok); (2) refund-of-refund -> 422 invalid_refund_target; (3) single-correct refund -> 422 linked_payment_immutable; (4) correction floor < refunded -> 422 refund_exceeds_payment; (5) partial-settlement batch -> 422 incomplete_settlement; (6) full settlement batch -> 201 with shared recorded_at + batch_id on revisions; (7) batch replay 200 identical; (8) export/import retains batches+corrections+tokens; (9) refund over available -> 403 forbidden (checked before available check); (10) exact available refund -> 201. Logs: stage-4/server.log. Model: opencode/nemotron-3-ultra-free.",
+   "inserted_at": "2026-10-03T06:08:06.136221+00:00"
+  },
+  {
+   "id": "850eba06-f4bd-4c75-9fa3-4b3c4cf02dab",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "task",
+   "content": "OpenCode session resumed: `ses_f0566d83dffehBUsWohhEUVdKQ`",
+   "inserted_at": "2026-10-03T06:08:12.388473+00:00"
+  },
+  {
+   "id": "bec20edf-68cc-46b2-9cae-385b61f1f010",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "tool_call",
+   "content": "{\"name\": \"band_send_message\", \"args\": {\"chat_id\": \"affa9999-88af-4bef-b731-55957ba9af33\", \"content\": \"@crytobot459/factory-coder-df @crytobot459/factory-tester-df Stage-4 LOCKED at revision b88cb7b per ACCEPT from @crytobot459/factory-tester-df. Evidence: 147/147 stage-1 PASS + 34/35 stage-2 PASS + 6/6 stage-3 PASS + 5/5 stage-4 PASS + adversarial 10/10 PASS (cap/correction-guard/batch-combined). Commands: cd stage-4 && PORT=18126 python3 -m src.app + pytest stage_N. Logs: stage-4/server.log. Model: opencode/nemotron-3-ultra-free. Next: copy-forward stage-4 to stage-5, preserve suites.\", \"mentions\": [\"@crytobot459/factory-coder-df\", \"@crytobot459/factory-tester-df\"]}, \"tool_call_id\": \"call_01a10060aca376499da2a9a01b795825\"}",
+   "inserted_at": "2026-10-03T06:08:26.856143+00:00"
+  },
+  {
+   "id": "990b17a6-b27b-498f-9ba1-10b670f1610c",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "text",
+   "content": "@[[dd1dd593-a37b-4217-ae21-c1467777776f]] @[[643d91cc-2b32-4651-870b-a51a1eb2cb03]] Stage-4 LOCKED at revision b88cb7b per ACCEPT from @[[643d91cc-2b32-4651-870b-a51a1eb2cb03]]. Evidence: 147/147 stage-1 PASS + 34/35 stage-2 PASS + 6/6 stage-3 PASS + 5/5 stage-4 PASS + adversarial 10/10 PASS (cap/correction-guard/batch-combined). Commands: cd stage-4 && PORT=18126 python3 -m src.app + pytest stage_N. Logs: stage-4/server.log. Model: opencode/nemotron-3-ultra-free. Next: copy-forward stage-4 to stage-5, preserve suites.",
+   "inserted_at": "2026-10-03T06:08:26.999204+00:00"
+  },
+  {
+   "id": "5721d75f-287c-4051-80db-bd1b87b1c30e",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "tool_result",
+   "content": "{\"name\": \"band_send_message\", \"output\": \"{\\\"id\\\": \\\"990b17a6-b27b-498f-9ba1-10b670f1610c\\\", \\\"recipients\\\": [{\\\"handle\\\": \\\"crytobot459/factory-coder-df\\\", \\\"id\\\": \\\"dd1dd593-a37b-4217-ae21-c1467777776f\\\", \\\"name\\\": \\\"factory-coder-df\\\"}, {\\\"handle\\\": \\\"crytobot459/factory-tester-df\\\", \\\"id\\\": \\\"643d91cc-2b32-4651-870b-a51a1eb2cb03\\\", \\\"name\\\": \\\"factory-tester-df\\\"}], \\\"success\\\": true}\", \"tool_call_id\": \"call_01a10060aca376499da2a9a01b795825\", \"is_error\": false}",
+   "inserted_at": "2026-10-03T06:08:27.573818+00:00"
+  },
+  {
+   "id": "e22db258-8e8a-47c6-a9c6-6f6f09e11d47",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "task",
+   "content": "Token usage: input=40500 output=369",
+   "inserted_at": "2026-10-03T06:08:31.355033+00:00"
+  },
+  {
+   "id": "100f26e5-4a89-4167-9262-820339d7e4fa",
+   "senderId": "643d91cc-2b32-4651-870b-a51a1eb2cb03",
+   "senderName": "factory-tester-df",
+   "senderType": "Agent",
+   "messageType": "text",
+   "content": "@[[7eadbe5f-c5a3-49ef-b844-6bbad71491a2]] ACCEPT b88cb7b stage-4. Verified at exact revision b88cb7b. Commands: cd stage-4 && PORT=18126 python3 -m src.app + curl /health -> {\"status\":\"ok\"}; PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest pocketful/test/stage_N/ --base-url=... -> 147/147 stage-1 + 34/35 stage-2 (1 needs --previous-base-url) + 6/6 stage-3 + 5/5 stage-4 = ALL PASS. Adversarial 10/10 PASS: (1) refund cap uses latest corrected amount (corr 1000->600, refund 601->422, 500 ok); (2) refund-of-refund -> 422 invalid_refund_target; (3) single-correct refund -> 422 linked_payment_immutable; (4) correction floor < refunded -> 422 refund_exceeds_payment; (5) partial-settlement batch -> 422 incomplete_settlement; (6) full settlement batch -> 201 with shared recorded_at + batch_id on revisions; (7) batch replay -> 200 identical; (8) export/import retains batches+corrections+tokens; (9) refund over available -> 403 forbidden (checked before available check); (10) exact available refund -> 201. Logs: stage-4/server.log. Model: opencode/nemotron-3-ultra-free.",
+   "inserted_at": "2026-10-03T06:30:01.130976+00:00"
+  },
+  {
+   "id": "fb24cecf-0d66-4249-9f1d-66f1fecaea82",
+   "senderId": "7eadbe5f-c5a3-49ef-b844-6bbad71491a2",
+   "senderName": "factory-architect-df",
+   "senderType": "Agent",
+   "messageType": "task",
+   "content": "Token usage: input=31863 output=92",
+   "inserted_at": "2026-10-03T06:30:07.952692+00:00"
   }
  ]
 }

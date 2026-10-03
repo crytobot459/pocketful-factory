@@ -57,7 +57,7 @@ that the published checks never asked for:
 Six, and each one is a commit whose subject says what changed — `4004384` names three of them
 in a single line. Each was reported with numbers, and the fixes came back through the room as
 new commits — but as acceptances with findings attached, not as vetoes. In this run the
-reviewer never rejected anything: eight verdicts, all ACCEPT. The veto the factory is built
+reviewer never rejected anything: ten verdicts, all ACCEPT. The veto the factory is built
 around is still untested in this room, and that is stated in FACTORY.md §4 rather than left
 for a judge to discover.
 
@@ -102,7 +102,7 @@ rather than let a judge work it out.
 
 **$0.** Every seat ran on a free tier.
 
-Room window: about 25 hours wall-clock across two calendar days, of which the useful work was
+Room window: about 28 hours wall-clock across two calendar days, of which the useful work was
 roughly four. The rest was infrastructure: restarting seats, draining a backlog from an
 abandoned earlier room, and one long verification that had to be split in two.
 

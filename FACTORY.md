@@ -97,7 +97,7 @@ to read. What it found that the published checks never asked for:
 **Two honest weaknesses in that list.** The stage-3 and stage-4 scenarios were graded inside the
 reviewer's session and written to `holdouts/stage-3.md` and `stage-4.md` afterwards, transcribed
 from the verdicts; the first two stages were written before verifying. Those two files say so at
-the top. And there is **no rejection in this room**: eight verdicts, all ACCEPT. The reviewer
+the top. And there is **no rejection in this room**: ten verdicts, all ACCEPT. The reviewer
 did change the work — the stage-2 error-element and split-preview defects and all three stage-4
 gaps were found by it and fixed by the implementer — but it found them by reporting acceptance
 with findings attached rather than by vetoing. A future run should veto at least once so the
@@ -127,7 +127,7 @@ submitted before had 482 messages in it, of which the reviewer wrote five, and r
 sentences announcing that the sender was waiting. Every mandate now names the sentences that
 are forbidden outright — "Standing by", "Noted", "Acknowledged", "Quiet", "Holding",
 "Waiting" — and states that silence, not a placeholder, is the correct output. The run in
-`room.json` has 49 seat messages, none of them a filler, and every one of them carries a
+`room.json` has 52 seat messages, none of them a filler, and every one of them carries a
 revision, a count or a verdict. Both halves of that are checked, not asserted: `verify_claims.py`
 counts the sentences each mandate forbids and fails if one appears in the room.
 
@@ -152,7 +152,7 @@ and a Gemini key, all of which rate-limit. Fallback is declared per seat in
 | The implementer's turn was cut off at 900 seconds part-way through stage 4 | human | turn timeout raised and taken from the environment; the stage-4 dispatch was posted again unchanged |
 | Two implementations of the same endpoints existed at once in a carried-forward folder | architect, at the start of stage 3 | refused to hand off blind, isolated the duplicate, had the implementer reconcile to one and re-run |
 | Two seats edited one file at once during stage 4 | coder reported it, architect partitioned | ownership of `app.py` assigned to one seat, the other held |
-| The room download returned 50 of 113 messages and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages properly and compares the sender type case-insensitively |
+| The room download returned half the room and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages properly and compares the sender type case-insensitively |
 
 The first six are the factory working: a seat found a defect the published checks did not
 name, reported it with numbers, and the fix came back through the room as a new revision.
@@ -165,10 +165,17 @@ should save another team from rediscovering.
 ## 5. Cost and time
 
 - Model spend: **$0**. Free tiers throughout.
-- Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T04:20Z, about 25 hours.
-- 113 messages: 49 seat messages (27 architect, 13 coder, 9 tester), the rest tool calls, tool
-  results and usage events. Eight verdicts, all ACCEPT; seven stage locks.
-- Tokens the room recorded: 221,701 in / 18,088 out, all attributed to the architect seat. The
+- Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T06:30Z, about 28 hours.
+- The export **runs to the end of the room**: it carries the final stage lock, so it shows the
+  band finishing rather than partway. This is worth stating because the first export did not.
+  It was taken at 04:20, five seconds after the architect flagged the wrong-revision verdict
+  in §4, and it stopped there — the run went on for two more hours, and the reviewer's
+  acceptance of the right revision and the stage-4 lock that followed were both missing. Every
+  document here described a finished run while the file showed the broken middle of one. The
+  export now reaches the end, and `verify_claims.py` fails on one that does not.
+- 121 messages: 52 seat messages (28 architect, 13 coder, 11 tester), the rest tool calls, tool
+  results and usage events. Ten verdicts, all ACCEPT; seven stage locks.
+- Tokens the room recorded: 294,064 in / 18,549 out, all attributed to the architect seat. The
   coder and tester seats report usage through their own adapters and their counts are not in the
   room log, so these are a floor, not a total. `python3 demo.py` recomputes this figure live from
   `room.json`, which is why it and this document used to disagree.

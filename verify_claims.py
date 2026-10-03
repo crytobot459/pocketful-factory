@@ -140,10 +140,20 @@ def room_claims() -> list[dict]:
              near=r"\bmessages?\b", any=[r"\b%d\b" % len(messages)]),
 
         dict(id="room.scope", source="room.json",
-             states=f'the download is a full session, not a filtered one '
-                    f'(scope "{data.get("scope", "")}")',
-             near=r"\broom\b|\bsession\b|\bdownload",
-             any=[r"\*\*full session\*\*", r"\bfull session\b", r"scope[^\n]*\bfull\b"]),
+             # Not "the scope field says full". That field is a literal the exporter writes,
+             # so checking it only proves the exporter is self-consistent -- and the export
+             # this replaces was labelled `full` while stopping two hours before the run
+             # ended, missing the verdict and the lock that finished it. What is checkable
+             # is whether the export reaches the end of the room: the last thing the band
+             # did was lock stage 4, so an export that carries that lock carries the
+             # session's end, whatever the endpoint chose to call it.
+             states="the export runs to the end of the room: it carries the final stage lock",
+             near=r"\broom\b|\bsession\b|\bdownload|\bexport\b",
+             any=[r"runs? to the end of the room",
+                  r"carries? the final stage lock",
+                  r"carries? the stage-4 lock",
+                  r"to the last message"],
+             must=("README.md", "FACTORY.md")),
 
         dict(id="room.seats", source="room.json",
              states=f"{len(seats)} distinct agent seats are in the room",
@@ -167,10 +177,13 @@ def room_claims() -> list[dict]:
         dict(id="room.accept", source="room.json",
              states=f"{verdicts['ACCEPT']} verdicts were ACCEPT",
              near=r"ACCEPT|verdict",
+             # Spelled out as well as written in digits: documents that read well say
+             # "ten verdicts", and a checker that only accepts digits fails them for
+             # being well written. The old special case for the literal 8 has a word form
+             # for every count now, so the count moving does not silently narrow the test.
              any=[r"\b%d (?:acceptances|verdicts)\b" % verdicts["ACCEPT"],
                   r"\b%d ACCEPT\b" % verdicts["ACCEPT"],
-                  r"[Ee]ight verdicts"] if verdicts["ACCEPT"] == 8 else
-                 [r"\b%d (?:acceptances|verdicts)\b" % verdicts["ACCEPT"]]),
+                  r"\b%s (?:acceptances|verdicts)\b" % _word(verdicts["ACCEPT"])]),
 
         dict(id="room.reject", source="room.json",
              states=f"{verdicts['REJECT']} verdicts were REJECT"
@@ -178,8 +191,7 @@ def room_claims() -> list[dict]:
              near=r"REJECT|verdict",
              any=[r"\b%d (?:rejections|REJECT)\b" % verdicts["REJECT"],
                   r"\b%d rejections?\b" % verdicts["REJECT"],
-                  r"all (?:eight |\d+ )?ACCEPT"] if verdicts["REJECT"] == 0 else
-                 [r"\b%d rejections?\b" % verdicts["REJECT"]]),
+                  r"all (?:%s |\d+ )?ACCEPT" % _word(verdicts["ACCEPT"])]),
 
         dict(id="room.filler", source="room.json",
              states=f"{filler} of the seat messages is a filler message",
@@ -314,6 +326,29 @@ def stale_claims() -> list[dict]:
              states="no finding is attributed to stage 3, which locked in one commit",
              forbidden=[r"in stage[- ]3[,.]? (?:the reviewer )?found",
                         r"stage[- ]3 defect"]),
+
+        # Figures from the truncated export. They were correct for the file that was in the
+        # tree, and they stopped being correct the moment the room was re-exported to the
+        # end of the run -- which is the argument for retiring a number rather than only
+        # asserting the new one.
+        dict(id="stale.room_total", source="the re-exported room.json",
+             states="the truncated export's message count appears in no document",
+             forbidden=[r"\b113 messages\b", r"room is 113\b", r"\b113\b.*\bmessages\b"]),
+        dict(id="stale.seat_texts", source="the re-exported room.json",
+             states="the truncated export's seat-message count appears in no document",
+             forbidden=[r"\b49 seat messages\b", r"[Ff]orty-nine of them are the agents"]),
+        dict(id="stale.byseat", source="the re-exported room.json",
+             states="the truncated export's per-seat split appears in no document",
+             forbidden=[r"\b27, 13 and 9\b", r"27 architect, 13 coder, 9 tester"]),
+        dict(id="stale.verdict_count", source="the re-exported room.json",
+             states="the truncated export's verdict count appears in no document",
+             forbidden=[r"[Ee]ight verdicts", r"\b8 verdicts\b", r"\b8 ACCEPT\b"]),
+        dict(id="stale.tokens", source="the re-exported room.json",
+             states="the truncated export's token totals appear in no document",
+             forbidden=[r"221,?701", r"18,?088"]),
+        dict(id="stale.room_window", source="the re-exported room.json",
+             states="the truncated export's end-of-run timestamp appears in no document",
+             forbidden=[r"2026-10-03T04:20", r"about 25 hours"]),
     ]
 
 
@@ -437,6 +472,39 @@ def _hits(claim: dict, lines: list[str]) -> list[int]:
     return hits
 
 
+def _export_tail_problems() -> list[str]:
+    """Does `room.json` reach the end of the run?
+
+    The export this checks replaced was taken at 04:20 and stopped five seconds after the
+    architect flagged a verdict issued against the wrong revision. The run then went on for
+    two more hours and finished with the reviewer accepting the right revision and the
+    architect locking stage 4 -- and neither message was in the file. So the export showed
+    the factory at its worst moment and omitted the repair, while every document described
+    a run that had finished.
+
+    A truncated export cannot be caught by counting messages: the count is whatever was
+    downloaded. It is caught by asking whether the last thing the band did is in the file.
+    """
+    problems = []
+    try:
+        data = json.loads(ROOM.read_text())
+    except (OSError, ValueError):
+        return problems
+    texts = [str(m.get("content", "")) for m in data.get("messages") or []
+             if m.get("messageType") == "text"]
+    joined = "\n".join(texts)
+    if not texts:
+        return problems
+    for stage, sha in sorted(STAGE_LOCKS.items()):
+        if not re.search(rf"stage[- ]?{stage}\s+LOCKED at revision {sha}\b", joined, re.I) \
+           and not re.search(rf"LOCKED at revision {sha}\b", joined, re.I):
+            problems.append(
+                f"room.tail: room.json has no message locking stage {stage} at {sha}. The "
+                f"export stops before the run finished, so it shows the band partway rather "
+                f"than done. Re-export with band-agents/fetch_room.py.")
+    return problems
+
+
 def evidence_problems() -> list[str]:
     """Properties of the evidence itself, which no document can satisfy or break.
 
@@ -456,7 +524,7 @@ def evidence_problems() -> list[str]:
         problems.append(f"git.history: {f['own_commits']} commits for this entry. A "
                         f"multi-stage build committed as one dump looks nothing like that, "
                         f"and the room discusses more revisions than that.")
-    return problems
+    return problems + _export_tail_problems()
 
 
 def check() -> list[str]:

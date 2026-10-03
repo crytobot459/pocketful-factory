@@ -15,7 +15,7 @@ concurrent writes, and rounding.
 
 - What the band built, and what it cost: **[FACTORY.md](FACTORY.md)**
 - Where every number here comes from: **[docs/EVIDENCE.md](docs/EVIDENCE.md)**
-- The room it worked in: `room.json`, the full session
+- The room it worked in: `room.json`, the whole session
 - The service: `stage-1/` through `stage-4/`, one complete buildable service per stage
 
 ## What is here
@@ -24,7 +24,7 @@ concurrent writes, and rounding.
 |---|---|
 | `FACTORY.md` | the factory: seats, design choices, what it cost, how it catches and recovers from bad work, how to stand it up elsewhere |
 | `mandates/` | one file per seat, named after the seat, opening with the harness and model that seat runs |
-| `room.json` | the room, downloaded in full: every message, tool call and verdict |
+| `room.json` | the room: every message, tool call and verdict, and it runs to the end of the room -- the last thing the band did was lock stage 4, and that message is in the file. An earlier export stopped two hours short, before the verdict that fixed a wrong-revision error, and `verify_claims.py` now fails on an export that does not reach the end. |
 | `stage-N/` | one folder per stage: `Dockerfile`, `RUN.md`, source. Each builds on its own and passes every earlier suite |
 | `holdouts/` | the reviewer's scenarios, plus `run_scenarios.py`, which runs them against a live service |
 | `band-agents/` | the three thin adapters that connect each seat to the room |
