@@ -65,10 +65,11 @@ have given four clean logs and four disconnected factories. One room means the l
 factory that kept going, and the copy-forward is what forces each stage to keep the earlier
 contracts rather than rewriting them.
 
-**A reviewer with veto, and the veto is the point.** The tester never writes service code. It
-checks out the exact revision it was given, runs the shipped checks itself, and writes its own
-adversarial scenarios in `holdouts/`, which the implementer is forbidden to read. What it
-produced, beyond the shipped checks:
+**The reviewer has teeth, and the teeth are the scenarios.** The tester never writes service
+code. It cannot make a failing check pass by editing the thing being checked.
+
+It writes its own adversarial scenarios, in its own folder, which the implementer is forbidden
+to read. What it found that the published checks never asked for:
 
 - stage 1 — H1..H10: lost-response retry moves money once; a burst of 10 identical writes
   yields 1 effect and 9 replays; a reused marker with a different body conflicts and moves
@@ -84,16 +85,23 @@ produced, beyond the shipped checks:
   change the total only by what was captured; every screen state has a testable element.
 - stage 3 — S3-H1..S3-H11: a correction that fails for funds changes nothing; a correction that
   succeeds leaves no error; a stale `expected_revision` conflicts rather than overwriting;
-  statements stay frozen across writes landing between pages; a snapshot token is rejected when
-  combined with a range; another person's snapshot is not readable; a view pinned to an instant
-  does not move when a correction lands afterwards; arithmetic in a statement reconciles against
-  balances; conservation holds at the end of the run.
-- stage 4 — S4-H1..S4-H10: the refund cap follows the *corrected* amount, not the original, so
-  a correction downward makes an over-refund fail; refunding a refund is refused; a correction
+  statements stay frozen across writes landing between pages; a lost response after a correction
+  replays rather than moving money twice; two parties see two different statements; the
+  arithmetic in a statement reconciles; conservation holds at the end of the run.
+- stage 4 — S4-H1..S4-H10: the refund cap follows the *corrected* amount, not the original, so a
+  correction downward makes an over-refund fail; refunding a refund is refused; a correction
   cannot be applied to a refund; a correction cannot take a payment below what has already been
-  refunded; a refund moves from available and not from held; only the receiver may refund; a
-  batch correction touching one member of a settlement changes nothing at all; a batch that is
-  unaffordable across its members applies none of it.
+  refunded; only the receiver may refund; a batch correction touching one member of a settlement
+  changes nothing at all; a batch is checked for money across all its members together.
+
+**Two honest weaknesses in that list.** The stage-3 and stage-4 scenarios were graded inside the
+reviewer's session and written to `holdouts/stage-3.md` and `stage-4.md` afterwards, transcribed
+from the verdicts; the first two stages were written before verifying. Those two files say so at
+the top. And there is **no rejection in this room**: eight verdicts, all ACCEPT. The reviewer
+did change the work — the stage-2 error-element and split-preview defects and all three stage-4
+gaps were found by it and fixed by the implementer — but it found them by reporting acceptance
+with findings attached rather than by vetoing. A future run should veto at least once so the
+room shows the veto actually stopping something.
 
 **Explicit message discipline, because the first attempt at this failed.** The run this factory
 submitted before had 482 messages in it, of which the reviewer wrote five, and roughly half were
@@ -114,25 +122,35 @@ and a Gemini key, all of which rate-limit. Fallback is declared per seat in
 | Snapshot restore applied twice duplicated records | reviewer, stage 1 H9 | implementer rewrote the restore path: validate everything, deep-copy, swap atomically |
 | The browser left a hidden error element in the DOM after success | reviewer, stage 2 | element created on demand and removed when cleared, so "no error" is a real state |
 | A list reload wiped the error the failed action had just set | reviewer, stage 2 | the reload stopped touching the error; only the action decides |
-| The split preview did not match what the server recorded | reviewer, stage 2 | preview text reduced to the amount alone, in the element the tests address |
-| Two implementations of the same endpoints existed at once in a carried-forward folder | architect, at the start of stage 3 | architect refused to hand off blind, isolated the duplicate, had the implementer reconcile to one and re-run |
-| The reviewer checking out a revision moved HEAD off the branch tip and stranded a later commit | human, watching the reflog | branch fast-forwarded from the reflog; no history rewritten, because the stranded commit was a descendant of the tip. The stage-4 dispatch now forbids a bare `git checkout <sha>` for exactly this reason |
-| The room download returned 50 of 95 messages and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages with a cursor, and compares the sender type case-insensitively |
+| The split preview did not match what the server recorded | reviewer, stage 2 | preview text reduced to the amount alone, in the element the checks address |
+| The refund cap used the original amount, so a correction downward did not tighten it | reviewer, stage 4 | cap recomputed against the latest corrected amount |
+| A batch correction could be applied to a settlement without all of its members | reviewer, stage 4 | completeness check, plus affordability summed across members |
+| A reviewer checking out a revision moved HEAD off the branch tip and stranded a later commit | human, watching the reflog | branch fast-forwarded from the reflog; no history rewritten, because the stranded commit was a descendant of the tip |
+| That same checkout made a verdict land against the wrong revision | reviewer, then architect | the architect refused to lock `b88cb7b` on a verdict for `92d9a5f` and sent it back. The reviewer's mandate now forbids a bare `git checkout <sha>` |
+| The implementer's turn was cut off at 900 seconds part-way through stage 4 | human | turn timeout raised and taken from the environment; the stage-4 dispatch was posted again unchanged |
+| Two implementations of the same endpoints existed at once in a carried-forward folder | architect, at the start of stage 3 | refused to hand off blind, isolated the duplicate, had the implementer reconcile to one and re-run |
+| Two seats edited one file at once during stage 4 | coder reported it, architect partitioned | ownership of `app.py` assigned to one seat, the other held |
+| The room download returned 50 of 113 messages and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages properly and compares the sender type case-insensitively |
 
-The first four are the factory working: a seat found a defect the published checks did not
-name, rejected or flagged it with numbers, and the fix came back through the room as a new
-revision. The last two are what it costs to run three agents on one machine, and they are the
-kind of thing a written factory document should save another team from rediscovering.
+The first six are the factory working: a seat found a defect the published checks did not name,
+reported it with numbers, and the fix came back through the room as a new revision. The rest are
+what it costs to run three agents on one machine, and they are the kind of thing a written
+factory document should save another team from rediscovering.
 
 ## 5. Cost and time
 
 - Model spend: **$0**. Free tiers throughout.
-- Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T03:27Z.
+- Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T04:20Z, about 25 hours.
+- 113 messages: 49 seat messages (27 architect, 13 coder, 9 tester), the rest tool calls, tool
+  results and usage events. Eight verdicts, all ACCEPT; seven stage locks.
 - Tokens the room recorded: 191,555 in / 16,068 out, all attributed to the architect seat. The
   coder and tester seats report usage through their own adapters and their counts are not in the
   room log, so these are a floor, not a total.
-- Wall-clock overhead that was not work: roughly 40 minutes on the stage-1 run went to seat
-  restarts and to draining the backlog of the abandoned room.
+- Wall-clock overhead that was not work: seat restarts, draining the backlog of an abandoned
+  earlier room, and two verifications that ran past the turn deadline and had to be restarted.
+- One human message went into the middle of stage 4, re-posting that stage's dispatch unchanged
+  after the implementer's turn was cut off. That is the sort of thing the collaboration is meant
+  not to need, and it is recorded here rather than left for someone to notice in the log.
 
 ## 6. Standing this up on a different problem
 
