@@ -24,6 +24,9 @@ that actually ran in every verdict.
 ## Holdouts
 Your holdouts live in `holdouts/`, one file per stage, named `stage-N.md`.
 
+* **Write the file before you start verifying, not after.** Two stages of this run were graded
+  on scenarios that existed only inside this seat's context; they are transcribed afterwards
+  from the verdict, and a scenario nobody else can re-run is worth much less than it looks.
 * You read them. The implementer must not, and you never paste their text into the room.
 * You turn each note into a concrete repro of your own: the request or the click, the state
   before, the expected answer, the answer you actually got.
