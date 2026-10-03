@@ -1,20 +1,22 @@
 {
-  "revision": "203863ab681c894e77da2f7673990b3c845aa639",
+  "revision": "",
   "track": "pocketful",
   "stages": {
     "1": "pass",
-    "2": "pass"
+    "2": "pass",
+    "3": "pass",
+    "4": "pass"
   },
-  "highest_contiguous": 2,
-  "started_at": "2026-10-03T06:53:52.128291+00:00",
-  "finished_at": "2026-10-03T06:55:18.087017+00:00",
+  "highest_contiguous": 4,
+  "started_at": "2026-10-03T09:01:18.818924+00:00",
+  "finished_at": "2026-10-03T09:02:41.664654+00:00",
   "schema_version": 2,
-  "run_id": "216ba90eb3114427bdbcbb985ed14f7a",
+  "run_id": "6f71e8bf250d4c08ac8603f833afffe8",
   "mode": "isolated",
   "provenance": "working-tree",
   "state": "completed",
   "pytest_args": [],
-  "suite_digest": "2b10528cac13c5e4078394267e35194eb41a35721b25e868131c027e33ed6c1c",
+  "suite_digest": "20ed03f371228cf06bbcd84986abf34f4b84d12abfac2e2164ff10b5d1e41bf6",
   "checks": {
     "1": {
       "collected": 147,
@@ -65,19 +67,53 @@
           "total": 25
         }
       }
+    },
+    "3": {
+      "collected": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_3/test_sample.py": {
+          "passed": 6,
+          "total": 6
+        }
+      }
+    },
+    "4": {
+      "collected": 5,
+      "passed": 5,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_4/test_sample.py": {
+          "passed": 5,
+          "total": 5
+        }
+      }
     }
   },
   "overshoot": null,
-  "claimed_stage": "2",
+  "claimed_stage": "4",
   "share": 1.0,
   "upgrade_sources": {
     "2": {
-      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-1",
-      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
+      "folder": "/tmp/pf-final/stage-1",
+      "revision": ""
     },
     "3": {
-      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-2",
-      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
+      "folder": "/tmp/pf-final/stage-2",
+      "revision": ""
+    },
+    "4": {
+      "folder": "/tmp/pf-final/stage-3",
+      "revision": ""
     }
   }
 }

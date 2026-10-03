@@ -1,0 +1,59 @@
+{
+  "revision": "",
+  "track": "pocketful",
+  "stages": {
+    "1": "pass"
+  },
+  "highest_contiguous": 1,
+  "started_at": "2026-10-03T08:57:48.021836+00:00",
+  "finished_at": "2026-10-03T08:58:44.910018+00:00",
+  "schema_version": 2,
+  "run_id": "0076156a75604c54b7d332782e6997ac",
+  "mode": "isolated",
+  "provenance": "working-tree",
+  "state": "completed",
+  "pytest_args": [],
+  "suite_digest": "36e5fc1077f847d486ba67df8d2e621b017a3fea068b780cbb9a2ef6a759ab41",
+  "checks": {
+    "1": {
+      "collected": 147,
+      "passed": 147,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_1/test_me_payments.py": {
+          "passed": 24,
+          "total": 24
+        },
+        "stage_1/test_requests_splits_feed.py": {
+          "passed": 39,
+          "total": 39
+        },
+        "stage_1/test_retries_splits_input.py": {
+          "passed": 51,
+          "total": 51
+        },
+        "stage_1/test_sample.py": {
+          "passed": 19,
+          "total": 19
+        },
+        "stage_1/test_seeded_state.py": {
+          "passed": 14,
+          "total": 14
+        }
+      }
+    }
+  },
+  "overshoot": null,
+  "claimed_stage": "1",
+  "share": 1.0,
+  "upgrade_sources": {
+    "2": {
+      "folder": "/tmp/pf-final/stage-1",
+      "revision": ""
+    }
+  }
+}

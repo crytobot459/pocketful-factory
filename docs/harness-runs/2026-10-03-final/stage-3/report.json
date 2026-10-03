@@ -1,5 +1,5 @@
 {
-  "revision": "203863ab681c894e77da2f7673990b3c845aa639",
+  "revision": "",
   "track": "pocketful",
   "stages": {
     "1": "pass",
@@ -7,10 +7,10 @@
     "3": "pass"
   },
   "highest_contiguous": 3,
-  "started_at": "2026-10-03T06:55:19.018228+00:00",
-  "finished_at": "2026-10-03T06:56:57.409374+00:00",
+  "started_at": "2026-10-03T08:59:48.861195+00:00",
+  "finished_at": "2026-10-03T09:01:17.549576+00:00",
   "schema_version": 2,
-  "run_id": "6cdfdd5fcf0e4a1baf9376875e53c6e4",
+  "run_id": "b2977368524f45b480832edef2e1001d",
   "mode": "isolated",
   "provenance": "working-tree",
   "state": "completed",
@@ -88,16 +88,16 @@
   "share": 1.0,
   "upgrade_sources": {
     "2": {
-      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-1",
-      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
+      "folder": "/tmp/pf-final/stage-1",
+      "revision": ""
     },
     "3": {
-      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-2",
-      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
+      "folder": "/tmp/pf-final/stage-2",
+      "revision": ""
     },
     "4": {
-      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-3",
-      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
+      "folder": "/tmp/pf-final/stage-3",
+      "revision": ""
     }
   }
 }

@@ -1,5 +1,9 @@
 # pocketful-factory
 
+[![CI](https://github.com/crytobot459/pocketful-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/crytobot459/pocketful-factory/actions/workflows/ci.yml)
+[![claims](https://github.com/crytobot459/pocketful-factory/actions/workflows/ci.yml/badge.svg?job=claims)](https://github.com/crytobot459/pocketful-factory/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 A software factory in three coding-agent seats. One of them decomposes a stage of a written
 specification, one implements it, and one checks the result against that specification and
 vetoes it if it is wrong. They work in one room, and once a stage is dispatched a human does not
@@ -10,6 +14,7 @@ payments service where money must never be created, destroyed, or spent twice �
 concurrent writes, and rounding.
 
 - What the band built, and what it cost: **[FACTORY.md](FACTORY.md)**
+- Where every number here comes from: **[docs/EVIDENCE.md](docs/EVIDENCE.md)**
 - The room it worked in: `room.json`, the full session
 - The service: `stage-1/` through `stage-4/`, one complete buildable service per stage
 
@@ -52,8 +57,11 @@ a smoke test. What carries those two is the reviewer's own adversarial work in
 [`holdouts/`](holdouts/), not the six and five. See FACTORY.md §2 for what the number is and is
 not worth.
 
-The run is kept rather than summarised: [`docs/harness-runs/`](docs/harness-runs/) has the
-`summary.json`, four `report.json` files and every per-suite log.
+The run is kept rather than summarised, and it was taken against an export of the **committed**
+tree rather than the working directory — 90 files, no `.env`, no virtualenv, no logs, which is
+what a clone actually contains. [`docs/harness-runs/`](docs/harness-runs/) has the
+`summary.json`, four `report.json` files and every per-suite log; its README explains why that
+distinction decides whether the run means anything.
 
 **Every number in this file and in FACTORY.md is checked against the evidence by
 [`verify_claims.py`](verify_claims.py), which CI runs.** It extracts each figure from
