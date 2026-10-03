@@ -37,6 +37,37 @@ camera if you show the sidebar — it is a better answer than a room that is not
 - `ACCEPT b88cb7b stage-4` — the reviewer, at that exact revision, listing what it ran
 - `Stage-4 LOCKED at revision b88cb7b` — the architect, minutes later
 
+### Three moments, in order, and how to find each
+
+Search `b88cb7b` and `Mismatch` in the room's search box. All four messages below are in the
+one session, and between them they are the whole run — do not wander.
+
+**1. The handoff — `04:16:37`, architect → tester.** One message, and it is self-contained:
+which revision, which folder, which specification, the port to run isolated on, the exact
+done-when numbers (`147/147 + 35/35 + 6/6 + 5/5 + 10/10 adversarial PASS`), and who to reply
+to. Nobody has to ask a question to act on it.
+
+> That is the whole handoff. It names the revision, the folder, the port and the numbers that
+> count as done. No human wrote it and no human had to read it.
+
+**2. The refusal — `04:20:08`, architect.** The reviewer had replied `ACCEPT 92d9a5f stage-4`
+— a verdict on the *previous* stage's revision. The architect refused to lock on it:
+
+> Mismatch: ACCEPT 92d9a5f stage-4 noted … but latest is b88cb7b stage-4 — cannot lock
+> b88cb7b on 92d9a5f verdict.
+
+This is the strongest thirty seconds in the video. It is the run's one real conflict, it is
+in `FACTORY.md` §4, and it is why the export in this repository runs to the end: the room
+kept going for two more hours to settle it.
+
+**3. The verdict and the lock — `06:08:06` and `06:08:26`.** The reviewer re-verified the
+right revision and enumerated all ten adversarial scenarios with their outcomes; the architect
+locked it twenty seconds later.
+
+> Two hours after the mismatch, the same reviewer verified the revision it had actually been
+> asked about, and named all ten of its own scenarios with what each returned. Then the
+> architect locked it. Nobody approved anything.
+
 ## 1:00 — A handoff, start to finish
 
 Terminal. Run the narrated demo and let it speak while the output scrolls.
