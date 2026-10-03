@@ -145,6 +145,8 @@ and a Gemini key, all of which rate-limit. Fallback is declared per seat in
 | The split preview did not match what the server recorded | reviewer, stage 2 | preview text reduced to the amount alone, in the element the checks address |
 | The refund cap used the original amount, so a correction downward did not tighten it | reviewer, stage 4 | cap recomputed against the latest corrected amount |
 | A batch correction could be applied to a settlement without all of its members | reviewer, stage 4 | completeness check, plus affordability summed across members |
+| The error banner showed the server's error code to the person who had mistyped a handle | human, in `docs/screenshots/` | every code mapped to a sentence; the code now follows in small muted type |
+| Every `RUN.md` and the README told a judge to sign in to an account that does not exist yet | human, following `RUN.md` by hand | the published fixture and its `POST /_test/reset` are now in all four `RUN.md` files |
 | A reviewer checking out a revision moved HEAD off the branch tip and stranded a later commit | human, watching the reflog | branch fast-forwarded from the reflog; no history rewritten, because the stranded commit was a descendant of the tip |
 | That same checkout made a verdict land against the wrong revision | reviewer, then architect | the architect refused to lock `b88cb7b` on a verdict for `92d9a5f` and sent it back. The reviewer's mandate now forbids a bare `git checkout <sha>` |
 | The implementer's turn was cut off at 900 seconds part-way through stage 4 | human | turn timeout raised and taken from the environment; the stage-4 dispatch was posted again unchanged |
@@ -152,10 +154,13 @@ and a Gemini key, all of which rate-limit. Fallback is declared per seat in
 | Two seats edited one file at once during stage 4 | coder reported it, architect partitioned | ownership of `app.py` assigned to one seat, the other held |
 | The room download returned 50 of 113 messages and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages properly and compares the sender type case-insensitively |
 
-The first six are the factory working: a seat found a defect the published checks did not name,
-reported it with numbers, and the fix came back through the room as a new revision. The rest are
-what it costs to run three agents on one machine, and they are the kind of thing a written
-factory document should save another team from rediscovering.
+The first six are the factory working: a seat found a defect the published checks did not
+name, reported it with numbers, and the fix came back through the room as a new revision.
+The next two are what happens when a human looks at the product with their own eyes instead
+of through a test runner, and they are the reason `tools/shoot_ui.py` exists and why
+`docs/screenshots/` is committed rather than described. The rest are what it costs to run
+three agents on one machine, and they are the kind of thing a written factory document
+should save another team from rediscovering.
 
 ## 5. Cost and time
 

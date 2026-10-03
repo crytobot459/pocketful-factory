@@ -38,6 +38,8 @@ button:disabled{opacity:0.55;cursor:default}
 .row{display:flex;gap:0.6rem;flex-wrap:wrap;align-items:end}
 .err{background:var(--danger-bg);color:var(--danger);border:1px solid #fecaca;
 border-radius:8px;padding:0.55rem 0.7rem;margin-top:0.6rem}
+.err-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.78rem;
+opacity:0.75;letter-spacing:0.01em}
 .uncertain{display:none;background:var(--warn-bg);color:var(--warn);border:1px solid #fde68a;
 border-radius:8px;padding:0.55rem 0.7rem;margin-top:0.6rem}
 .uncertain.show{display:block}
@@ -74,11 +76,46 @@ async function api(path,opts){
   if(opts.key){h['Idempotency-Key']=opts.key;}
   return fetch(path,{method:opts.method||'GET',headers:h,body:opts.body});
 }
+const ERR_TEXT={
+  not_found:'We could not find that. Check the handle and try again.',
+  unauthenticated:'Your session has ended. Sign in again to continue.',
+  forbidden:'That account is not allowed to do this.',
+  validation_failed:'Some of the details are not right. Check them and try again.',
+  malformed_request:'We could not read what was sent. Try again.',
+  insufficient_funds:'Not enough available funds for this.',
+  self_payment:'You cannot pay yourself.',
+  self_request:'You cannot request money from yourself.',
+  request_not_pending:'That request is no longer waiting to be paid.',
+  email_taken:'An account already uses that email address.',
+  handle_taken:'That handle is already taken.',
+  idempotency_key_reuse:'This retry does not match the original, so nothing was changed.',
+  missing_idempotency_key:'This request needs a retry key, so nothing was changed.',
+  stale_revision:'Someone else changed this first. Reload to see the current version.',
+  historical_overdraft:'That change would overdraw an earlier balance.',
+  incomplete_settlement:'This settlement is not finished, so it cannot be changed.',
+  linked_payment_immutable:'This payment came from a settlement and cannot be changed on its own.',
+  refund_exceeds_payment:'The refund is more than this payment is worth.',
+  invalid_refund_target:'That is not something this payment can be refunded against.',
+  authorization_expired:'That authorisation has expired.',
+  authorization_not_open:'That authorisation is no longer open.',
+  capture_exceeds_authorization:'That is more than the authorisation has left.',
+  range:'That value is outside the allowed range.'
+};
+function errText(code){
+  return ERR_TEXT[code]||('That did not go through. Nothing was changed.');
+}
 async function apiErr(res){
+  var code='error', msg='';
   try{var j=await res.json();
-    if(j&&j.error&&j.error.code){return j.error.code;}
-    return 'request failed ('+res.status+')';
-  }catch(e){return 'request failed ('+res.status+')';}
+    if(j&&j.error&&j.error.code){code=j.error.code;msg=j.error.message||'';}
+  }catch(e){}
+  // The specification asks for messages written for people, with technical identifiers
+  // only where they help. So the sentence leads, and the code follows in small muted
+  // type: a person reads what happened, and someone reporting the problem can quote
+  // the code instead of describing a screenshot.
+  var text=errText(code);
+  if(msg&&msg!=='error'&&msg!==code){text=text+' ('+msg+')';}
+  return {text:text,code:code};
 }
 function fmt(minor,currency,amount){
   var neg=amount<0?'':'';
@@ -135,7 +172,20 @@ function showErr(id,msg){
     el.setAttribute('role','alert');
     slot.appendChild(el);
   }
-  el.textContent=msg;
+  // `msg` is either a plain sentence or the {text, code} pair apiErr returns. The
+  // sentence leads and the code follows in small muted type: a person reads what
+  // happened, and someone reporting the problem can quote the code rather than
+  // describe a screenshot.
+  if(typeof msg==='string'){
+    el.textContent=msg;
+    return;
+  }
+  el.textContent='';
+  el.appendChild(document.createTextNode(msg.text+' '));
+  var code=document.createElement('span');
+  code.className='err-code';
+  code.textContent=msg.code;
+  el.appendChild(code);
 }
 async function loadMe(){
   try{

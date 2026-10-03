@@ -27,8 +27,10 @@ concurrent writes, and rounding.
 | `docs/harness-runs/` | the event harness's own report from the isolated run, kept rather than summarised |
 | `docs/DECK.md`, `docs/DEMO_SCRIPT.md` | the deck, and a recording plan for the video |
 | `docs/EVIDENCE.md` | where every number in these documents comes from, generated and checked |
+| `docs/screenshots/` | the browser product, at 1280px and at 375px, in every state the spec names |
 | `docs/SUBMIT_CHECKLIST.md` | what to check before publishing, written against the ways this entry went wrong |
 | `verify_claims.py` | re-derives every figure from the evidence and fails if a document disagrees |
+| `tools/shoot_ui.py` | re-takes the screenshots and measures layout, labels and focus rings |
 
 ## Results, from the event harness
 
@@ -86,8 +88,12 @@ PORT=8080 python3 -m src.app
 curl -s http://127.0.0.1:8080/health        # {"status":"ok"}
 ```
 
-Then open <http://127.0.0.1:8080/>. Sign in as `ada@example.com` with the password
-`correct horse` — those three seeded accounts come from the specification's test fixtures.
+Then open <http://127.0.0.1:8080/>. A fresh service holds no accounts — the specification
+seeds state through `POST /_test/reset`, not at container start — so seed the published
+fixture first. `stage-4/RUN.md` has the command to paste; it is the same in all four
+folders. After it returns 204, sign in as `ada@example.com` with the password
+`correct horse`, and you are looking at Ada with a balance of 100.00 EUR, one paid
+"coffee" in the feed and one pending "taxi" request. `POST /auth/signup` works too.
 
 To build it the way a judge does:
 
@@ -106,6 +112,36 @@ python3 holdouts/run_scenarios.py --base-url http://127.0.0.1:8080 --stage 4
 
 Each check prints what it expected against what it read, and the exit status is 0 only when
 every one of them passed. CI runs the stage-1, stage-3 and stage-4 sets against every build.
+
+## Looking at the product
+
+The stage-2 specification asks for a coherent, presentation-ready product, and for the
+required flows to work at a 375 CSS-pixel viewport without horizontal scrolling. None of
+that is asserted by the shipped checks, which read `data-testid` attributes rather than
+looking at anything. So it is checked by looking at it:
+
+| | |
+|---|---|
+| ![The wallet screen, signed in, with a hold on part of the balance](docs/screenshots/desktop-home.png) | ![The same screen at 375 pixels](docs/screenshots/mobile-home.png) |
+| Available funds are the largest value on the page and total and held are secondary — the hierarchy the specification asks for once holds exist | The same at a 375 CSS-pixel viewport, with no horizontal scrolling |
+
+More in [`docs/screenshots/`](docs/screenshots/): the requests list, the split form, a
+refused payment, the login error, signup, and both widths of each. `tools/shoot_ui.py`
+re-takes all of them and, while it is there, measures what a screenshot cannot show —
+whether anything overflows horizontally, whether every input has a label, and whether
+every control a keyboard reaches has a visible focus ring:
+
+```bash
+cd stage-4 && PORT=8080 python3 -m src.app &
+python3 tools/shoot_ui.py --base-url http://127.0.0.1:8080 --out docs/screenshots
+```
+
+That tool found the one product defect in this repository. The error banner showed the
+server's error code — `not_found` — to somebody who had typed a handle that does not
+exist. The specification asks for people first and technical identifiers "only where they
+help the user", so the banner now leads with a sentence and carries the code in small
+muted type beside it: a person reads what happened, and someone reporting the problem can
+quote the code instead of describing a screenshot.
 
 ## Standing the factory up
 
