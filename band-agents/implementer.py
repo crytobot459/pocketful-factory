@@ -9,6 +9,9 @@ from band.config import load_agent_config
 
 logger = logging.getLogger(__name__)
 REPO = str(__import__("pathlib").Path(__file__).resolve().parent.parent)
+# A turn is cut off at this many seconds. 900 stopped the implementer part-way
+# through the last stage: the work was fine, the deadline was not.
+TURN_TIMEOUT_S = float(os.getenv("TURN_TIMEOUT_S", "1800"))
 
 
 async def main():
@@ -29,7 +32,7 @@ async def main():
             model_id=model_id,
             approval_mode="auto_accept",
             question_mode="auto_reject",
-            turn_timeout_s=900.0,
+            turn_timeout_s=TURN_TIMEOUT_S,
             fallback_send_agent_text=False,  # model silence stays silent; kills ack-livelock
         ),
         emit={Emit.TOOL_CALLS, Emit.TASK_EVENTS, Emit.USAGE},

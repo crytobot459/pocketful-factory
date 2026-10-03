@@ -15,6 +15,9 @@ from band.config import load_agent_config
 
 logger = logging.getLogger(__name__)
 REPO = str(__import__("pathlib").Path(__file__).resolve().parent.parent)
+# A turn is cut off at this many seconds. 900 stopped the implementer part-way
+# through the last stage: the work was fine, the deadline was not.
+TURN_TIMEOUT_S = float(os.getenv("TURN_TIMEOUT_S", "1800"))
 
 
 async def main():
@@ -43,7 +46,7 @@ async def main():
             # Submitted run: reviewer must never block on human questions mid-run.
             question_mode="auto_reject",
             # Full verify (shipped suites + adversarial) exceeds the 300s default.
-            turn_timeout_s=900.0,
+            turn_timeout_s=TURN_TIMEOUT_S,
             # Model silence stays silent (no filler posts); kills ack-livelock.
             fallback_send_agent_text=False,
         ),
