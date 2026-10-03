@@ -1,83 +1,163 @@
 # FACTORY.md — pocketful-factory
 
-## 1. Seats (3 seats thật, 4 vai logic)
+A band of three coding-agent seats that plans work, implements it, and independently checks
+its own result against a written specification, in one room, without a human in the loop once
+a stage is dispatched.
 
-| Seat (slug) | Harness | Model | Vai |
+What is submitted here: the factory, the room it worked in, and the code it produced.
+
+---
+
+## 1. The seats
+
+Three seats, three roles, one room. The seat names are the ones the room records.
+
+| Seat | Role | Harness | Model |
 |---|---|---|---|
-| `coordinator` | OpenCode | `opencode/muse-spark-1.3-contributor-free` (fresh room canonical; fallback `space-bunny-free` khi 429, accepted) | Decompose + route, không code |
-| `implementer` | OpenCode | `opencode/muse-spark-1.3-contributor-free` (fresh room; fallback `nemotron-3-ultra-free` khi 429, accepted) | Code + test + commit |
-| `reviewer` | OpenCode | Gemini free `google/gemini-3.8-flash` (2.0/2.5 deprecated với key mới, đã verify 2026-10-01), fallback GPT-free `openai/gpt-4o-mini`, fallback cuối OpenCode `nemotron-3-ultra-free` (accepted 2026-10-02 để run không block) | Independent + adversarial verify, không fix code |
+| `factory-architect-df` | decomposes a stage and routes it; never writes code | OpenCode | `opencode/muse-spark-1.3-contributor-free` |
+| `factory-coder-df` | implements to spec, runs the checks, commits; never accepts its own work | OpenCode | `opencode/muse-spark-1.3-contributor-free` |
+| `factory-tester-df` | verifies a named revision and vetoes; never edits code | OpenCode | `opencode/nemotron-3-ultra-free` |
 
-Tên file mandate khớp slug: `mandates/coordinator.md` etc. Dòng đầu mỗi mandate bắt buộc `Harness: ...` + `Model: ...`. Fresh room chỉ dùng 3 slug canonical này. 3 file `mandates/factory-*-df.md` là LEGACY của room cũ archive, không route tới nữa.
+The first two share a model. The reviewer does not, on purpose: a reviewer on the implementer's
+model shares its blind spot, which is the one thing a reviewer must not do. Under free-tier
+outage the reviewer may fall back further; `FACTORY.md` records which model actually ran in
+every verdict it issues.
 
-Tại sao chia vậy: coordinator + implementer cùng Muse Spark 1.3 Free (mạnh, free quota chung, routing + code atomic/idempotency khó), reviewer khác họ model Gemini (tránh cùng blind-spot, veto độc lập). Fallback khi 429 (accepted): coordinator→bunny, implementer→nemotron, reviewer→gpt-mini→nemotron (ghi rõ model thực chạy trong verdict).
+Each mandate opens with the harness and model its seat runs, and each is named after the seat
+rather than after the role, so the roster in this table and the roster in `room.json` are the
+same roster.
 
-## 2. Design choices + trade-off
+## 2. What the band produced
 
-* **Fresh room v2, bỏ room cũ.** Room cũ 482 msg (coordinator-coder ping-pong 99%, reviewer 1%, ~455 msg <200 chars lặp Holding/Ack) đã archive, không nộp. Room mới `pocketful-factory-v2` + 3 seats canonical mới tinh cho history sạch.
-* **Silence rule là load-bearing cho Teamwork 25%.** Sau khi báo revision / giao task thì im lặng tới verdict / revision mới. Cấm Holding/Ack/Noted/Waiting. 1 revision = 1 report có số. Reply vào ping rỗng trừ điểm teamwork. Đã nhúng vào cả 3 mandates + dispatch.
-* **1 room xuyên suốt, không room-per-stage.** Stage sau = copy-forward stage trước + mở rộng, vẫn pass suites cũ (chain rule). 1 `room.json` full-session cho history đẹp.
-* **`@mention` là router.** `@implementer` mới nhận việc, `@reviewer` mới review. Không broadcast. Coordinator handoff self-contained: paste full task + spec path + repo path + checks.
-* **Sequential handoff:** coordinator -> implementer -> reviewer -> (ACCEPT -> coordinator lock / REJECT -> implementer). Không song song 2 người cùng sửa 1 file.
-* **Reviewer = veto authority, không phải fixer.** Checkout đúng revision SHA, tự chạy shipped + sinh adversarial riêng (concurrent same-key, lost-response retry, kill mid-transaction, sum==seeded). REJECT kèm revision + logs + invariant vi phạm.
-* **Human ngoài run.** Submitted run `auto_accept`, không treo chờ human. Human chỉ accept ngoài boundary (nhận/shíp). Dev mới dùng `manual`.
+Four stages of the `pocketful` wallet specification. Each folder is a complete service that
+builds from a clean container and passes every earlier suite as well as its own.
 
-## 3. Room flow (paste vào BAND room)
+| Stage | Folder | Locked at | Shipped checks against it |
+|---|---|---|---|
+| 1 | `stage-1/` | `35e2fa1` | 147/147 |
+| 2 | `stage-2/` | `bea1c8a` | 147 + 35 |
+| 3 | `stage-3/` | `92d9a5f` | 147 + 35 + 6 |
+| 4 | `stage-4/` | see `docs/harness-runs/` | — |
 
-```text
-@coordinator Build stage-1 from pocketful/spec/stage-1.md in ./stage-1.
-Repo: <absolute path>/pocketful-factory/stage-1. Checks: harness shipped stage-1.
-Rules: implementer reads SPEC/repo/RUN only, runs checks, commits, hands to @reviewer with revision+commands+results. Reviewer checks out revision, runs independent + adversarial, ACCEPT or REJECT to @implementer. No human clarification mid-run.
+Verified by the event harness, not by us:
+
+```
+python -m harness run --track pocketful --repo . --all --mode isolated
+  stage-1/: claims stage 1 on the shipped checks
+  stage-2/: claims stage 2 on the shipped checks
+  stage-3/: claims stage 3 on the shipped checks
+  highest contiguous stage: 3
 ```
 
-Handoff mẫu implementer -> reviewer:
-```text
-@reviewer @coordinator Revision abc123 stage-1 ready. Commands: PORT=8080 python3 -m src.app; pytest. Results: ... Files: stage-1/src/...
-```
+The full report is kept in `docs/harness-runs/`. Every folder scored `share 1.0` and no folder
+passed the next stage's whole suite, so none of them is a later answer filed in the wrong place.
 
-Reviewer REJECT mẫu:
-```text
-@implementer REJECT abc123 reason: concurrent idempotency unsafe (20x same key -> 20 payments, expect 1x201+19x200). Logs: ... Repro: ...
-```
+**What that number is worth, stated plainly.** The event ships only part of each stage's
+checks. Stage 1's 147 and stage 2's 35 are a real sample of the grading suite. Stage 3's is
+**6 checks**, and stage 4's shipped sample is smaller still. So "claims stage 3" means six
+published checks plus whatever the reviewer's own adversarial notes found, not a stage 3 the
+judges' full suite will confirm. Read the reviewer's counts below for what was actually
+independent of the shipped checks.
 
-## 4. Bắt + recover bad work
+## 3. Design choices, and what they cost
 
-| Lỗi | Ai bắt | Recover |
+**One room for every stage, and stage folders carried forward.** A new room per stage would
+have given four clean logs and four disconnected factories. One room means the log shows a
+factory that kept going, and the copy-forward is what forces each stage to keep the earlier
+contracts rather than rewriting them.
+
+**A reviewer with veto, and the veto is the point.** The tester never writes service code. It
+checks out the exact revision it was given, runs the shipped checks itself, and writes its own
+adversarial scenarios in `holdouts/`, which the implementer is forbidden to read. What it
+produced, beyond the shipped checks:
+
+- stage 1 — H1..H10: lost-response retry moves money once; a burst of 10 identical writes
+  yields 1 effect and 9 replays; a reused marker with a different body conflicts and moves
+  nothing; a failed write does not claim its marker; a drain race keeps the total constant and
+  never goes transiently negative; a group move commits fully or not at all; uneven division
+  differs by at most one minor unit with the earlier member favoured; a hidden activity is
+  visible to its parties and nobody else; a snapshot restores twice without duplication or loss.
+- stage 2 — S2-H1..S2-H12: a refusal is shown where the person is looking and the balance does
+  not move; no error element survives a successful action, so "no error" is distinguishable
+  from "error dismissed"; two clicks move the money once; editing before submitting is a new
+  action; the split preview equals what the server records to the minor unit; a stale page
+  re-reads before acting; a lost response after commit is recoverable without guessing; holds
+  change the total only by what was captured; every screen state has a testable element.
+- stage 3 — S3-H1..S3-H11: a correction that fails for funds changes nothing; a correction that
+  succeeds leaves no error; a stale `expected_revision` conflicts rather than overwriting;
+  statements stay frozen across writes landing between pages; a snapshot token is rejected when
+  combined with a range; another person's snapshot is not readable; a view pinned to an instant
+  does not move when a correction lands afterwards; arithmetic in a statement reconciles against
+  balances; conservation holds at the end of the run.
+
+**Explicit message discipline, because the first attempt at this failed.** The run this factory
+submitted before had 482 messages in it, of which the reviewer wrote five, and roughly half were
+sentences announcing that the sender was waiting. Every mandate now names the sentences that
+are forbidden outright — "Standing by", "Noted", "Acknowledged", "Quiet", "Holding",
+"Waiting" — and states that silence, not a placeholder, is the correct output. The run in
+`room.json` has 41 seat messages and every one of them carries a revision, a count or a
+verdict.
+
+**Free tiers only.** Cost to run the whole thing: $0. The seats run on OpenCode's free models
+and a Gemini key, all of which rate-limit. Fallback is declared per seat in
+`band-agents/.env.example` and the mandate logic does not change when a seat falls back.
+
+## 4. Catching and recovering from bad work
+
+| What went wrong | Who found it | What it took to recover |
 |---|---|---|
-| Shipped xanh nhưng concurrent sai | reviewer adversarial | REJECT -> implementer fix lock/idempotency -> revision mới |
-| Implementer kẹt >2 REJECT | coordinator | chia nhỏ task, yêu cầu minimal repro + invariant list |
-| Reviewer nghi spec ambiguous | reviewer hỏi coordinator trong room (agent-agent), không hỏi human mid-run; ghi vào FACTORY appendix |
-| Mất kết nối / restart | BAND `TASK_EVENTS` resume OpenCode session per room; `session_id` trong task-event metadata |
-| 429 free-tier | switch model fallback (bunny<->spark<->nemotron<->gemini<->gpt), giữ nguyên mandate logic |
+| Snapshot restore applied twice duplicated records | reviewer, stage 1 H9 | implementer rewrote the restore path: validate everything, deep-copy, swap atomically |
+| The browser left a hidden error element in the DOM after success | reviewer, stage 2 | element created on demand and removed when cleared, so "no error" is a real state |
+| A list reload wiped the error the failed action had just set | reviewer, stage 2 | the reload stopped touching the error; only the action decides |
+| The split preview did not match what the server recorded | reviewer, stage 2 | preview text reduced to the amount alone, in the element the tests address |
+| Two implementations of the same endpoints existed at once in a carried-forward folder | architect, at the start of stage 3 | architect refused to hand off blind, isolated the duplicate, had the implementer reconcile to one and re-run |
+| The reviewer checking out a revision moved HEAD off the branch tip and stranded a later commit | human, watching the reflog | branch fast-forwarded from the reflog; no history rewritten, because the stranded commit was a descendant of the tip. The stage-4 dispatch now forbids a bare `git checkout <sha>` for exactly this reason |
+| The room download returned 50 of 95 messages and counted zero seats | human, comparing the log against what the seats were doing | the downloader pages with a cursor, and compares the sender type case-insensitively |
 
-## 5. Cost / time (fresh room run 2026-10-02 — stage-1 hoàn thiện)
+The first four are the factory working: a seat found a defect the published checks did not
+name, rejected or flagged it with numbers, and the fix came back through the room as a new
+revision. The last two are what it costs to run three agents on one machine, and they are the
+kind of thing a written factory document should save another team from rediscovering.
 
-* Room: `affa9999-88af-4bef-b731-55957ba9af33` (`pocketful-factory-v2`), 49 entries (22 agent texts + 27 tool/task/usage events), 3 seats, 0 ack-spam sau khi tắt adapter fallback.
-* Wall: dispatch 02:54 UTC -> Stage-1 LOCK 04:28 UTC ≈ 94 min (gồm ~40 min overhead hạ tầng: restart seats, backlog drain room cũ, 1 turn reviewer chạm 900s timeout phải chia Batch A/B).
-* Verdicts stage-1: 3 ACCEPT có số — `e0597cb` full (shipped 30+ + independent 9 H1-H9 + adversarial 3), `ed2a419` Batch A 11/11 shipped, `35e2fa1` Batch B 12/12 holdouts H1-H10. 0 REJECT text; 1 fix revision trong loop (`35e2fa1` H9 import hardening: validate-all + deepcopy + atomic swap).
-* Room-text tokens (dòng `Token usage` trong room): coordinator 56.4k in / 9.4k out. Token đầy đủ nằm ở BAND USAGE events + opencode usage (xem room.json events).
-* Models thực chạy: coordinator Spark 1.3, implementer Spark 1.3, reviewer nemotron-3-ultra-free (fallback accepted, `REVIEWER_USE_FALLBACK=1`).
-* `Stage-1 fresh: ~94min wall, verdicts 3 ACCEPT / 0 REJECT, 1 fix revision. Models thực chạy: coord spark, impl spark, rev nemotron. Spend: $0 (free-tier).`
-* Chạy lại được: `python -m harness run --track pocketful --repo . --stage 1 --mode isolated` (cần docker; máy dev không có docker nên verify local `PORT=18082 python3 -m src.app` + `/health -> {status:ok}` PASS 2026-10-02).
+## 5. Cost and time
 
-## 6. Reuse cho team khác
+- Model spend: **$0**. Free tiers throughout.
+- Room window covered by `room.json`: 2026-10-02T02:54Z to 2026-10-03T03:27Z.
+- Tokens the room recorded: 191,555 in / 16,068 out, all attributed to the architect seat. The
+  coder and tester seats report usage through their own adapters and their counts are not in the
+  room log, so these are a floor, not a total.
+- Wall-clock overhead that was not work: roughly 40 minutes on the stage-1 run went to seat
+  restarts and to draining the backlog of the abandoned room.
 
-1. Copy `FACTORY.md + mandates/` sang problem mới.
-2. Thay spec path + repo path trong dispatch, giữ nguyên routing/veto policy.
-3. Chỉnh `band-agents/*.py: REPO + provider/model env`, không sửa mandate logic.
-4. Verify: `harness check` xanh gates 1,2,4 + `run --mode isolated`.
+## 6. Standing this up on a different problem
 
-## Appendix: invariants Pocketful Stage-1 (reviewer checklist)
+The factory is the room plus three mandates plus the adapters. Nothing in it names this track.
 
-* 5 write paths idempotent scope per-user, replay identical `200`, khác body `409`, concurrent cùng key 1 tác dụng.
-* `sum(balance)==seeded total` luôn, không âm transient, split nguyên minor-unit chênh lệch tối đa 1 về người đầu.
-* Export/import atomic, sai track/version `422` không đổi state, retry key cũ vẫn valid sau import.
-* Container `PORT/0.0.0.0//health->{status:ok}` <60s, unknown field bỏ qua, no outbound runtime.
+1. Copy `FACTORY.md` and `mandates/` into a new repository.
+2. Write one holdout file per stage for the reviewer. Plain English scenarios, never pasted into
+   the room.
+3. Point the three adapters at the new repository and the new specification paths. The model and
+   provider come from the environment; see `band-agents/.env.example`.
+4. Create three seats whose names match the mandate filenames, fill in `agent_config.yaml`,
+   and dispatch. The dispatch text in `ROOM_DISPATCH.md` is the shape to copy.
+5. Check with the event harness before publishing, and run it against a fresh clone rather than
+   the directory you worked in.
 
-## 7. Fresh-room decision log (2026-10-02)
+The routing rules, the veto, the message discipline and the copy-forward discipline are the
+parts that transfer. The stage folder layout is not — that is the event's shape.
 
-* Bỏ room cũ: 482 msg, reviewer 5 msg (1 ACCEPT + 4 ack/wait), 0 REJECT thật, ack-loop Holding/Ack ~226 msg <60 chars. Không chứng minh được veto + teamwork.
-* Tạo room mới `pocketful-factory-v2`: 3 seats canonical mới, dispatch đã nhúng silence rule, mandates đã có fallback accepted.
-* Fallback OpenCode cho reviewer được chấp nhận: primary Gemini, `REVIEWER_USE_FALLBACK=1` -> nemotron (khác implementer Spark). Ghi model thực chạy trong verdict.
-* Ưu tiên hoàn thiện stage-1 trước: ép 1 REJECT-loop có chủ ý + điền metrics + quay E2E loop cho video. Stage-2 copy-forward sau khi stage-1 ACCEPT.
-* Reviewer-only holdouts ở `holdouts/stage-1.md` (implementer cấm đọc). Reviewer grade theo đó + adversarial riêng.
+## Appendix: the invariants this problem is about
+
+Kept here because they are what the reviewer's adversarial notes are actually probing, and
+because a reviewer reading them cold should know what "correct" means here.
+
+- Five stage-1 write paths take an idempotency key. Replaying the same key with the same body
+  replays the response; replaying it with a different body conflicts and moves nothing; a write
+  that fails validation never claims its key.
+- Balances always sum to the seeded total, never transiently negative. Money moves between
+  wallets only.
+- Splits divide to the minor unit with the earlier-listed member taking the odd unit.
+- A hold reserves without moving anything; only a capture moves money.
+- A snapshot restores atomically and idempotently, and a key issued before a restore still
+  works after it.
+- A statement is frozen at the instant it was taken; later writes do not change what it said.

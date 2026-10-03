@@ -1,50 +1,76 @@
-# pocketful-factory — Dark Factory (Pocketful track, BAND)
+# pocketful-factory
 
-![factory](https://img.shields.io/badge/factory-BAND-blue) ![ci](https://img.shields.io/badge/ci-pytest-blue) ![license](https://img.shields.io/badge/license-MIT-green)
+A software factory in three coding-agent seats. One of them decomposes a stage of a written
+specification, one implements it, and one checks the result against that specification and
+vetoes it if it is wrong. They work in one room, and once a stage is dispatched a human does not
+touch it again.
 
-> Factory 3 seats OpenCode xây wallet/payments đúng invariant dưới retry + concurrency + failure. 1 room xuyên suốt, copy-forward stage-1 -> stage-4, evidence = room log + git history + isolated harness.
+They were pointed at the `pocketful` track of the BAND Dark Factory hackathon: a wallet and
+payments service where money must never be created, destroyed, or spent twice — under retries,
+concurrent writes, and rounding.
 
-* Track: `pocketful` (Venmo-like). Spec chính thức: `/Users/admin/dark-factory-wearedevs/pocketful/spec/stage-*.md`
-* Factory: `FACTORY.md` + `mandates/` (generic, không chứa endpoint/field/error)
-* Submission structure chuẩn official: `README, FACTORY, mandates/, room.json, stage-N/Dockerfile+RUN.md`
-* Harness kiểm tra: `python -m harness check` (gates 1,2,4 offline) + `run --mode isolated` (gate 3)
+- What the band built, and what it cost: **[FACTORY.md](FACTORY.md)**
+- The room it worked in: `room.json`, the full session
+- The service: `stage-1/` through `stage-4/`, one complete buildable service per stage
 
-## Chạy stage-1 local (không cần BAND key)
+## What is here
 
-```bash
-cd stage-1 && pip install -r requirements.txt && PORT=8080 python3 -m src.app
-# test khác terminal:
-curl -s http://127.0.0.1:8080/health
-# check official (từ /Users/admin/dark-factory-wearedevs, tạm dời band-agents/.env ra /tmp vì check quét cả file gitignored):
-# python3 -m harness check /Users/admin/harness/lablab-harness/build/pocketful-factory --track pocketful
+| Path | What it is |
+|---|---|
+| `FACTORY.md` | the factory: seats, design choices, what it cost, how it catches and recovers from bad work, how to stand it up elsewhere |
+| `mandates/` | one file per seat, named after the seat, opening with the harness and model that seat runs |
+| `room.json` | the room, downloaded in full: every message, tool call and verdict |
+| `stage-N/` | one folder per stage: `Dockerfile`, `RUN.md`, source. Each builds on its own and passes every earlier suite |
+| `holdouts/` | the reviewer's private scenarios, one file per stage. The implementer is forbidden to read them |
+| `band-agents/` | the three thin adapters that connect each seat to the room |
+| `docs/harness-runs/` | the event harness's own report from the isolated run, kept rather than summarised |
+| `docs/templates/` | submission, deck and script skeletons. Outlines, not this factory's story |
+
+## Results, from the event harness
+
+```
+python -m harness run --track pocketful --repo . --all --mode isolated
 ```
 
-## Chạy factory BAND (cần key, không commit key)
+| Folder | Claims | share | Overshoot |
+|---|---|---|---|
+| `stage-1/` | stage 1 | 1.0 | none |
+| `stage-2/` | stage 2 | 1.0 | none |
+| `stage-3/` | stage 3 | 1.0 | none |
+
+Highest contiguous stage: 3. The event ships only part of each stage's checks, so this is
+directional — see FACTORY.md §2 for what the number is and is not worth.
+
+## Running a stage yourself
+
+No account, no keys, no Docker needed for a quick look:
 
 ```bash
-cd band-agents
-cp .env.example .env  # điền GEMINI_API_KEY, OPENAI_API_KEY, BAND keys vào .env local
-cp agent_config.example.yaml agent_config.yaml  # điền 3 seat UUID/key từ app.band.ai
-opencode serve --hostname=127.0.0.1 --port=4096
-# 3 terminal riêng:
-uv run python coordinator.py
-uv run python implementer.py
-uv run python reviewer.py
-# Trên app.band.ai: tạo room mới `pocketful-factory`, add 3 remotes, paste dispatch ở ROOM_DISPATCH.md § Dispatch Stage-1 nguyên văn
+cd stage-3
+pip install -r requirements.txt
+PORT=8080 python3 -m src.app
+curl -s http://127.0.0.1:8080/health        # {"status":"ok"}
 ```
 
-## Cần key gì
+Then open <http://127.0.0.1:8080/>. Sign in as `ada@example.com` with the password
+`correct horse` — those three seeded accounts come from the specification's test fixtures.
 
-* BAND seat UUID/key x3 MỚI TINH (https://app.band.ai/agents → tạo 3 agents mới, không tái dùng room cũ) — bắt buộc cho factory thật
-* `GEMINI_API_KEY` (free, https://aistudio.google.com/apikey) cho reviewer
-* `OPENAI_API_KEY` (free-tier bạn cấp) làm fallback reviewer
-* Coordinator/Implementer dùng `opencode/muse-spark-1.3-contributor-free` (room mới; fallback coordinator `space-bunny-free`, implementer `nemotron-3-ultra-free` khi 429)
-* Không commit key. Xem `.gitignore` + `band-agents/.env.example`.
+To build it the way a judge does:
 
-## Cấu trúc
+```bash
+docker build -t pocketful-stage3 ./stage-3
+docker run --rm -p 8080:8080 -e PORT=8080 pocketful-stage3
+```
 
-* `FACTORY.md` — thiết kế factory, routing, veto, cost/time, recover (judge đọc cho Factory 50%)
-* `mandates/` — 3 files generic theo seat slug
-* `stage-1/` — Dockerfile + RUN.md + src (factory build, copy-forward lên stage-2...)
-* `band-agents/` — 3 agents OpenCode nối BAND rooms thật
-* `room.json` — Download full session từ Band console (scope=full), đổi tên đúng `room.json`, KHÔNG commit key
+## Standing the factory up
+
+See `ROOM_DISPATCH.md`. In short: `opencode serve`, fill in `band-agents/.env` and
+`band-agents/agent_config.yaml` from the templates next to them, run the three adapters, create
+three seats whose names match the mandate filenames, and post the dispatch.
+
+Keys are never committed. `harness check` scans gitignored files too, so move `.env` and
+`agent_config.yaml` out of the tree for the length of the check.
+
+## Licence
+
+MIT. The specification the band built to belongs to the hackathon organisers; see FACTORY.md.
