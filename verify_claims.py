@@ -298,6 +298,22 @@ def stale_claims() -> list[dict]:
                         r"became a (?:rejection|veto)",
                         r"\b(?:four|4) (?:rejections|vetoes|REJECT verdicts)\b",
                         r"reviewer rejected"]),
+
+        # A count of the reviewer's findings, attributed to a stage. `room.json` carries no
+        # such count and FACTORY.md section 4 is what it has to agree with: one stage-1
+        # finding, three in stage 2, none in stage 3, two in stage 4. The narration once said
+        # "three defects in stage 4", which is the number a listener would carry out of the
+        # video and a judge could not check against anything.
+        dict(id="stale.stage4_findings", source="FACTORY.md section 4",
+             states="the stage-4 finding count is two, and stage 3 found nothing",
+             forbidden=[r"three defects? in stage[- ]4",
+                        r"three (?:defects|gaps|bugs) in stage[- ]4",
+                        r"\b3 defects? in stage[- ]4"]),
+
+        dict(id="stale.stage3_finding", source="FACTORY.md section 4",
+             states="no finding is attributed to stage 3, which locked in one commit",
+             forbidden=[r"in stage[- ]3[,.]? (?:the reviewer )?found",
+                        r"stage[- ]3 defect"]),
     ]
 
 

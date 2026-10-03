@@ -57,8 +57,11 @@ git log --oneline -- stage-4/src/app.py
 > The reviewer checks the exact revision it was handed and writes its own scenarios — the
 > ones the published checks never asked for. It found the refund cap being computed from the
 > original amount rather than the corrected one, so a correction downward did not tighten
-> what could be refunded. Three defects in stage 4, one revision, all found by the seat that
-> is not allowed to fix them — and the fixes came back as new commits.
+> what could be refunded; and a batch correction that could be applied to a settlement
+> without all of its members. Two defects in stage 4, one revision, both found by the seat
+> that is not allowed to fix them — and the fixes came back as a new commit, `b88cb7b`.
+> Across the four stages it found six, and the list with the revision each was locked at is
+> slide 4 of the deck.
 >
 > Say it plainly: in this run the reviewer never vetoed. Eight verdicts, all ACCEPT — the
 > findings arrived attached to acceptances. The veto is still untested, and that is in the
@@ -123,8 +126,20 @@ Terminal, `git log --oneline`.
 
 ## Recording notes
 
+- `bash work/video/record_demo.sh` sets the whole thing up: it serves stage-4 from the
+  committed tree, seeds the published fixture through `POST /_test/reset`, opens BAND
+  Desktop on the room `pocketful-factory-v2`, opens the product, runs the reviewer's
+  scenarios and then `verify_claims.py`, and starts `screencapture`. `--serve-only` skips
+  the windows, `--no-capture` skips the recorder. Every shot below is one of its steps, in
+  that order, so the recording is reproducible rather than retyped.
+- The room shot is BAND Desktop (`/Applications/Jam.app`), not a browser tab. The event
+  disqualifies a video without the BAND Desktop room recording, and `app.band.ai` shows the
+  same room but is not the thing the rule names.
 - Record at 1920×1080 so the terminal text is legible when scaled down.
 - `demo.py` needs no key. Speech is skipped silently if `edge-tts` is missing; install it with
   `pip install edge-tts` to have the narration.
 - Cut on the numbers, not on the sentences. Every figure quoted above is in `docs/DECK.md` and in
   `FACTORY.md`, and both are traceable to `room.json` or the harness report.
+- Do not run `python -m harness run` on camera. It takes minutes and the report is already
+  committed under `docs/harness-runs/`; `python3 verify_claims.py` says the same thing in a
+  second, and it also checks the documents.
