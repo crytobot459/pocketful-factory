@@ -1,5 +1,5 @@
 {
-  "revision": "c5e1f7a4884ffba830af212031cddf44042268f3",
+  "revision": "203863ab681c894e77da2f7673990b3c845aa639",
   "track": "pocketful",
   "stages": {
     "1": "pass",
@@ -7,10 +7,10 @@
     "3": "pass"
   },
   "highest_contiguous": 3,
-  "started_at": "2026-10-03T04:26:43.939007+00:00",
-  "finished_at": "2026-10-03T04:28:29.351316+00:00",
+  "started_at": "2026-10-03T06:55:19.018228+00:00",
+  "finished_at": "2026-10-03T06:56:57.409374+00:00",
   "schema_version": 2,
-  "run_id": "6fd01587008a42c788d581ead3a1f608",
+  "run_id": "6cdfdd5fcf0e4a1baf9376875e53c6e4",
   "mode": "isolated",
   "provenance": "working-tree",
   "state": "completed",
@@ -89,15 +89,15 @@
   "upgrade_sources": {
     "2": {
       "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-1",
-      "revision": "c5e1f7a4884ffba830af212031cddf44042268f3"
+      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
     },
     "3": {
       "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-2",
-      "revision": "c5e1f7a4884ffba830af212031cddf44042268f3"
+      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
     },
     "4": {
       "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-3",
-      "revision": "c5e1f7a4884ffba830af212031cddf44042268f3"
+      "revision": "203863ab681c894e77da2f7673990b3c845aa639"
     }
   }
 }
