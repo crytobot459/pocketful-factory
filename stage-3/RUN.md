@@ -1,6 +1,6 @@
-# RUN.md — stage-3 (copy-forward of stage-2 + statements/corrections + browser UI)
+# RUN.md — stage-3 (stage-2 carried forward, plus statements and corrections)
 
-Build + start duy nhất judge follow y hệt (clean container, không manual):
+Build and start, exactly as a judge would: from a clean container, nothing manual.
 
 ```bash
 docker build -t pocketful-stage3 ./stage-3
@@ -14,15 +14,23 @@ curl -s http://127.0.0.1:8080/health
 # -> {"status":"ok"}
 ```
 
-Local không Docker:
+Without Docker:
 
 ```bash
 cd stage-3 && pip install -r requirements.txt && PORT=8080 python3 -m src.app
 ```
 
-Service bind `0.0.0.0`, đọc `PORT` default `8080`. Deps cài lúc build, runtime không internet.
-UI routes `/ /requests /split /signup /login /authorizations` serve HTML khi
-`Accept: text/html`, JSON trong các trường hợp còn lại. Mọi stage-1/2 suites vẫn pass.
-Thêm `GET /statement` (JSON, snapshot token cho paging ổn định),
-`GET /me?as_of=...&known_at=...`, `POST /payments/{id}/corrections` (idempotent
-write), `GET /payments/{id}/revisions`.
+Then open <http://127.0.0.1:8080/> and sign in as `ada@example.com` with the password
+`correct horse`.
+
+The service binds `0.0.0.0` and reads `PORT`, default `8080`. Dependencies are installed at
+build time; nothing reaches the network at run time.
+
+The browser routes serve HTML when the request carries `Accept: text/html`, and JSON otherwise.
+
+Added in this stage: `GET /statement`, which returns a snapshot token so that paging stays
+stable while writes land; `GET /me?as_of=...&known_at=...` for a balance as it stood at an
+instant; `POST /payments/{id}/corrections`, an idempotent write; and
+`GET /payments/{id}/revisions`.
+
+Every stage-1 and stage-2 check still passes against this folder.

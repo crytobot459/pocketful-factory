@@ -1,4 +1,4 @@
-# Holdouts stage-2 — REVIEWER ONLY (implementer cấm đọc)
+# Holdouts stage-2 — REVIEWER ONLY (the implementer must not read this)
 
 > Written in plain English so the reviewer can turn each one into a concrete repro. Do not
 > paste this file into the room while the implementer can still read it. The reviewer publishes

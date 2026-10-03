@@ -1,6 +1,10 @@
-# Holdouts stage-1 — REVIEWER ONLY (implementer cấm đọc)
+# Holdouts stage-1 — REVIEWER ONLY (the implementer must not read this)
 
-> Train/test separation: file này chỉ reviewer được mở. Implementer build theo spec, không build theo các ghi chú này. Mọi scenario dưới đây viết bằng plain English, reviewer tự dịch thành repro cụ thể khi verify. Không paste nguyên văn file này vào room chung khi implementer còn đọc được — reviewer chỉ công bố verdict ACCEPT/REJECT kèm invariant vi phạm + expected vs actual.
+> Train/test separation: only the reviewer opens this file. The implementer builds to the
+> specification, not to these notes. Each scenario below is written in plain English; the
+> reviewer turns it into a concrete repro while verifying. Never paste this file into the room
+> while the implementer can read it — the reviewer publishes only the verdict, ACCEPT or REJECT,
+> with the violated invariant and expected against actual.
 
 ## H1 — Lost-response retry moves money once
 Send a write with a fresh client marker, simulate a timeout after the server committed, then retry with the same marker and identical body. Expect the second reply to match the first verbatim with no second money move. Any double move is REJECT.

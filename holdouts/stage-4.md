@@ -1,4 +1,4 @@
-# Holdouts stage-4 — REVIEWER ONLY (implementer cấm đọc)
+# Holdouts stage-4 — REVIEWER ONLY (the implementer must not read this)
 
 > **Transcribed after the fact**, the same way as `stage-3.md`. The reviewer reported these
 > against revision `92d9a5f` as the stage-4 folder, before the last fix landed as `b88cb7b`;

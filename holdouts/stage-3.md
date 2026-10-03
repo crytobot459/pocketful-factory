@@ -1,4 +1,4 @@
-# Holdouts stage-3 — REVIEWER ONLY (implementer cấm đọc)
+# Holdouts stage-3 — REVIEWER ONLY (the implementer must not read this)
 
 > **Transcribed after the fact.** The reviewer seat ran these scenarios during the stage-3
 > verification and reported the results in the room; it did not persist them to a file first.

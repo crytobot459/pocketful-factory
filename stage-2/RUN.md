@@ -1,6 +1,6 @@
-# RUN.md — stage-2 (copy-forward of stage-1 + holds/authorizations + browser UI)
+# RUN.md — stage-2 (stage-1 carried forward, plus holds and the browser UI)
 
-Build + start duy nhất judge follow y hệt (clean container, không manual):
+Build and start, exactly as a judge would: from a clean container, nothing manual.
 
 ```bash
 docker build -t pocketful-stage2 ./stage-2
@@ -14,14 +14,21 @@ curl -s http://127.0.0.1:8080/health
 # -> {"status":"ok"}
 ```
 
-Local không Docker:
+Without Docker:
 
 ```bash
 cd stage-2 && pip install -r requirements.txt && PORT=8080 python3 -m src.app
 ```
 
-Service bind `0.0.0.0`, đọc `PORT` default `8080`. Deps cài lúc build, runtime không internet.
-UI routes `/ /requests /split /signup /login /authorizations` serve HTML khi
-`Accept: text/html`, JSON trong các trường hợp còn lại (chia sẻ path `/requests`,
-`/authorizations` với API). Mọi stage-1 suites vẫn pass (balance=total khi không
-có hold; insufficient_funds xét trên available).
+Then open <http://127.0.0.1:8080/> and sign in as `ada@example.com` with the password
+`correct horse`.
+
+The service binds `0.0.0.0` and reads `PORT`, default `8080`. Dependencies are installed at
+build time; nothing reaches the network at run time.
+
+The browser routes `/`, `/requests`, `/split`, `/signup`, `/login` and `/authorizations`
+serve HTML when the request carries `Accept: text/html`, and JSON otherwise. `/requests` and
+`/authorizations` are shared between the page and the API.
+
+Every stage-1 check still passes against this folder: balance equals total when nothing is
+held, and `insufficient_funds` is judged against available funds rather than the total.
