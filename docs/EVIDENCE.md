@@ -11,7 +11,7 @@ number below disagrees with a document, the document is wrong.
 |---|---|---|---|
 | `room.total` | the room holds 113 messages | `room.json` | `FACTORY.md:155` |
 | `room.scope` | the download is a full session, not a filtered one (scope "full") | `room.json` | `README.md:18` |
-| `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:158`, `FACTORY.md:13` |
+| `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:161`, `FACTORY.md:13` |
 | `room.text` | 49 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
 | `room.byseat` | the split across seats is 27 from the architect, 13 from the coder, 9 from the tester | `room.json` | `FACTORY.md:169` |
 | `room.accept` | 8 verdicts were ACCEPT | `room.json` | `FACTORY.md:100` |
@@ -27,11 +27,14 @@ number below disagrees with a document, the document is wrong.
 | `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48`, `FACTORY.md:46` |
 | `harness.mode` | the run was in isolated mode, in a clean container | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:32`, `FACTORY.md:33` |
 | `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46` |
-| `git.locks` | every stage's locked revision is in the git history (4/4) | `git log` | `FACTORY.md:37` |
+| `git.locks_exist` | every stage has a commit that both names and carries its lock (4/4) | `git log` | holds — evidence only, no document asserts it |
+| `git.locks_recorded` | FACTORY.md names the revision each stage locked at | `FACTORY.md` | `FACTORY.md:37` |
+| `git.history` | the history is 34 commits for this entry, one per revision rather than a single dump | `git log` | holds — evidence only, no document asserts it |
+| `git.history_stated` | the documents say the history is one commit per revision, not squashed | `README.md` | `README.md:72` |
 | `stale.tokens_in` | the superseded token count 191,555 appears in no document | `git history` | clear |
 | `stale.tokens_out` | the superseded token count 16,068 appears in no document | `git history` | clear |
 | `stale.text_count` | the superseded seat-message count 41 appears in no document | `room.json` | clear |
 | `stale.stage_count` | the superseded 3-stage result appears in no document | `docs/harness-runs/2026-10-03-final/summary.json` | clear |
 
-23 claim(s). Sources: `room.json` (the seat log as downloaded),
+26 claim(s). Sources: `room.json` (the seat log as downloaded),
 `docs/harness-runs/*/summary.json` (the event's own harness), and `git log`.

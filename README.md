@@ -69,6 +69,9 @@ distinction decides whether the run means anything.
 else. [`docs/EVIDENCE.md`](docs/EVIDENCE.md) is the generated table of where each one comes
 from. Run `python3 verify_claims.py` yourself: if it and this file ever disagree, it is right.
 
+The history is one commit per revision — no amend, no rebase, no squash — because the room
+discusses revisions and a rewritten history makes those SHAs unreachable.
+
 ## Hear it, in one command
 
 ```bash

@@ -44,9 +44,13 @@ FILLER = re.compile(
 TOKEN_USAGE = re.compile(r"Token usage: input=(\d+) output=(\d+)")
 VERDICT = re.compile(r"^(?:@\S+\s+)*(ACCEPT|REJECT)\b")
 
-# The revision each stage was locked at, as FACTORY.md records it. A revision that is not
-# in the git history is a stage lock that never happened.
+# Each stage was locked by a commit whose subject says so. Matched on the subject rather
+# than on a hash, because a hash is a property of one repository and not of the work: this
+# repository is published as a standalone one, where every commit has a different hash, and
+# a check that only passes in the development checkout is a check that stops working the
+# moment anyone clones it. The subject survives republishing; the hash does not.
 STAGE_LOCKS = {"1": "35e2fa1", "2": "bea1c8a", "3": "92d9a5f", "4": "b88cb7b"}
+STAGE_LOCK_SUBJECT = {n: f"pocketful stage-{n}:" for n in STAGE_LOCKS}
 
 STAGE_ROW = r"^\|\s*`stage-(\d)/`\s*\|"
 
@@ -283,16 +287,52 @@ def git(*args: str) -> str:
     return out.stdout.strip() if out.returncode == 0 else ""
 
 
+def _git_facts() -> dict:
+    """What the history says about stage locks, computed once and used twice."""
+    log = git("log", "--format=%H%x1f%s", "-200")
+    commits = [line.split("\x1f", 1) for line in log.splitlines() if "\x1f" in line]
+
+    # A stage lock is a commit that both says it locked the stage and carries that stage
+    # folder. It is rarely the commit that created the folder: stage 2 was created by a
+    # stage-1 commit, because each stage is the one before it carried forward, and both
+    # stage-2 commits only edited files inside it. So this reads the tree at that commit,
+    # not the files that commit happened to change.
+    locked = {}
+    for sha, subject in commits:
+        for stage, prefix in STAGE_LOCK_SUBJECT.items():
+            if stage in locked or not subject.startswith(prefix):
+                continue
+            tree = git("ls-tree", "-r", "--name-only", sha)
+            if f"stage-{stage}/Dockerfile" in tree and f"stage-{stage}/RUN.md" in tree:
+                locked[stage] = sha
+
+    # One commit per revision, not one dump. Counted over this entry's own commits, so the
+    # figure does not change with where the repository sits.
+    ours = [c for c in commits
+            if "pocketful" in c[1] or "factory" in c[1] or "band-agents" in c[1]]
+    return {"locked": locked, "expected": len(STAGE_LOCK_SUBJECT), "own_commits": len(ours)}
+
+
 def git_claims() -> list[dict]:
     if not git("rev-parse", "HEAD"):
         return []
-    history = git("log", "--format=%H %s", "-80")
-    present = [s for s in STAGE_LOCKS.values() if s in history]
+    f = _git_facts()
     return [
-        dict(id="git.locks", source="git log",
-             states="every stage's locked revision is in the git history "
-                    f"({len(present)}/{len(STAGE_LOCKS)})",
+        dict(id="git.locks_exist", source="git log",
+             states="every stage has a commit that both names and carries its lock "
+                    f"({len(f['locked'])}/{f['expected']})",
+             evidence_only=True),
+        dict(id="git.locks_recorded", source="FACTORY.md",
+             states="FACTORY.md names the revision each stage locked at",
              all=[re.escape(sha) for sha in STAGE_LOCKS.values()]),
+        dict(id="git.history", source="git log",
+             states=f"the history is {f['own_commits']} commits for this entry, one per "
+                    f"revision rather than a single dump",
+             evidence_only=True),
+        dict(id="git.history_stated", source="README.md",
+             states="the documents say the history is one commit per revision, not squashed",
+             any=[r"one commit per revision", r"no amend", r"not a single dump",
+                  r"rather than a single dump", r"not a dump"]),
     ]
 
 
@@ -328,15 +368,20 @@ def _hits(claim: dict, lines: list[str]) -> list[int]:
         found = [n for n, line in enumerate(lines, 1) if re.match(pattern, line)]
         return found if len(found) == expected else []
     if not claim.get("near"):
-        patterns = [p for p in claim.get("all") or [] if p]
+        # Document-scoped: `all` needs every pattern somewhere, `any` needs one. The lines
+        # reported are those carrying any of them, so the evidence table can point at rows.
+        every = [p for p in claim.get("all") or [] if p]
+        some = [p for p in claim.get("any") or [] if p]
+        patterns = every or some
         if not patterns:
             return []
-        # Document-scoped: every pattern has to appear somewhere in the file, and the
-        # lines reported are the ones carrying any of them, so the evidence table can
-        # point at the rows rather than at line 1.
-        hits = [n for n, line in enumerate(lines, 1)
+        joined = "\n".join(lines)
+        holds = (all(re.search(p, joined, re.I) for p in every) if every
+                 else any(re.search(p, joined, re.I) for p in some))
+        if not holds:
+            return []
+        return [n for n, line in enumerate(lines, 1)
                 if any(re.search(p, line, re.I) for p in patterns)]
-        return hits if all(re.search(p, "\n".join(lines), re.I) for p in patterns) else []
     hits = []
     for n, line in enumerate(lines, 1):
         if not re.search(claim["near"], line, re.I):
@@ -349,12 +394,40 @@ def _hits(claim: dict, lines: list[str]) -> list[int]:
     return hits
 
 
+def evidence_problems() -> list[str]:
+    """Properties of the evidence itself, which no document can satisfy or break.
+
+    Separate from `check` because a document cannot fix a missing stage lock, and active
+    rather than skipped because a lock that is not in the history is a stage that was
+    never locked -- the most serious thing here that could go wrong.
+    """
+    if not git("rev-parse", "HEAD"):
+        return []
+    f = _git_facts()
+    problems = []
+    if len(f["locked"]) < f["expected"]:
+        missing = sorted(set(STAGE_LOCK_SUBJECT) - set(f["locked"]))
+        problems.append(f"git.locks_exist: no commit both names and carries a lock for "
+                        f"stage {', '.join(missing)}; that stage was never locked")
+    if f["own_commits"] < 20:
+        problems.append(f"git.history: {f['own_commits']} commits for this entry. A "
+                        f"multi-stage build committed as one dump looks nothing like that, "
+                        f"and the room discusses more revisions than that.")
+    return problems
+
+
 def check() -> list[str]:
     docs = documents()
     if not docs:
         return [f"none of {', '.join(DOCS)} is present, so nothing can be checked"]
-    problems = []
+    problems = evidence_problems()
     for claim in all_claims():
+        if claim.get("evidence_only"):
+            # A property of the evidence, with nothing to match in a document. It is
+            # reported by --list and by --markdown, and checked by evidence_problems()
+            # above; requiring a document to state it would only ever pass in the one
+            # repository the checker was written in.
+            continue
         if claim.get("forbidden"):
             problems += _check_forbidden(claim, docs)
             continue
@@ -417,6 +490,13 @@ def markdown() -> str:
             out.append(f"| `{claim['id']}` | {claim['states']} | `{claim['source']}` | "
                        + (", ".join(places) + " **still present**" if places else "clear")
                        + " |")
+            continue
+        if claim.get("evidence_only"):
+            facts = evidence_problems()
+            ok = not any(f.split(":")[0] == claim["id"] for f in facts)
+            out.append(f"| `{claim['id']}` | {claim['states']} | `{claim['source']}` | "
+                       f"{'holds' if ok else '**does not hold**'} — evidence only, no "
+                       f"document asserts it |")
             continue
         where = []
         for path, text in docs:
