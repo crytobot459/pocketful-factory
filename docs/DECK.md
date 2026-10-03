@@ -37,13 +37,13 @@ a snapshot restored twice, a page whose state went stale under it.
 
 Those are not things a reviewer remembers at 5pm on a Friday. They are a list.
 
-## 4. The reviewer has real teeth
+## 4. The reviewer finds what the shipped checks never asked for
 
 The reviewer never writes service code. It cannot make a failing check pass by editing the
 thing being checked.
 
-It writes its own scenarios, in its own file, which the implementer is forbidden to read. What
-it found that the published checks never asked for:
+It writes its own scenarios, in notes the implementer is forbidden to read. What it found
+that the published checks never asked for:
 
 | | Scenario | What the shipped checks would have said |
 |---|---|---|
@@ -52,7 +52,11 @@ it found that the published checks never asked for:
 | stage 2 | the split preview disagrees with the server by one minor unit | fine |
 | stage 3 | a statement changes under you while you page through it | fine |
 
-Each became a rejection with numbers, and the fix came back through the room as a new commit.
+Each was reported with numbers, and the fixes came back through the room as new commits —
+but as acceptances with findings attached, not as vetoes. In this run the reviewer never
+rejected anything: eight verdicts, all ACCEPT. The veto the factory is built around is still
+untested in this room, and that is stated in FACTORY.md §4 rather than left for a judge to
+discover.
 
 ## 5. What it produced
 
@@ -64,7 +68,7 @@ clean container and passes every earlier stage's checks as well as its own.
 | 1 — the API | 147 / 147 |
 | 2 — the browser product | 147 + 35 |
 | 3 — history and corrections | 147 + 35 + 6 |
-| 4 — refunds and batch corrections | see the repository |
+| 4 — refunds and batch corrections | 147 + 35 + 6 + 5 |
 
 ## 6. Verified by the event's own harness
 
@@ -74,14 +78,17 @@ Not by us. The organiser's harness, isolated mode, building each folder from scr
 stage-1/  claims stage 1     share 1.0
 stage-2/  claims stage 2     share 1.0
 stage-3/  claims stage 3     share 1.0
-highest contiguous stage: 3
+stage-4/  claims stage 4     share 1.0
+highest contiguous stage: 4
 ```
 
 Nothing is claimed on our word. The report is committed at `docs/harness-runs/`.
 
-**And the honest caveat:** the event ships part of each stage's checks. Stage 3 is six published
-checks. That number is directional, and we say so in the factory document rather than let a
-judge work it out.
+**And the honest caveat:** the event ships part of each stage's checks. Stage 1's 147 and
+stage 2's 35 are a real sample of the grading suite; stage 3's 6 and stage 4's 5 are close to
+a smoke test. What carries those two is the reviewer's own adversarial work in `holdouts/`,
+not the six and five. That number is directional, and we say so in the factory document
+rather than let a judge work it out.
 
 ## 7. What it cost
 

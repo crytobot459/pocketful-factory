@@ -17,7 +17,7 @@ Terminal, nothing else on screen.
 
 ## 0:20 — The room, before anything is built
 
-Browser on the Band console. Scroll the room.
+BAND Desktop (jam). Open the room the band worked in and scroll it.
 
 Point at three things and say them:
 
@@ -51,19 +51,18 @@ the run has not shown you a factory.
 Cut to the room and to the git log together:
 
 ```bash
-git log --oneline -- stage-1/src/app.py
+git log --oneline -- stage-4/src/app.py
 ```
 
-> The reviewer checks out the exact revision it was handed and writes its own scenarios — the
-> ones the published checks never asked for. It found that restoring a snapshot twice duplicated
-> records. The implementer rewrote that path to validate everything, deep-copy and swap
-> atomically. That is two commits, and the second one only exists because the first was vetoed.
-
-If the stage-4 veto is in the log, use it instead:
-
-> The reviewer caught the refund cap being computed from the original amount rather than the
-> corrected one, so a correction downward did not tighten what could be refunded. Three defects,
-> one revision, all found by the seat that is not allowed to fix them.
+> The reviewer checks the exact revision it was handed and writes its own scenarios — the
+> ones the published checks never asked for. It found the refund cap being computed from the
+> original amount rather than the corrected one, so a correction downward did not tighten
+> what could be refunded. Three defects in stage 4, one revision, all found by the seat that
+> is not allowed to fix them — and the fixes came back as new commits.
+>
+> Say it plainly: in this run the reviewer never vetoed. Eight verdicts, all ACCEPT — the
+> findings arrived attached to acceptances. The veto is still untested, and that is in the
+> factory document rather than hidden from it.
 
 ## 2:30 — The service the factory built
 
@@ -74,7 +73,9 @@ cd stage-4 && pip install -r requirements.txt && PORT=8080 python3 -m src.app
 curl -s http://127.0.0.1:8080/health
 ```
 
-Browser on <http://127.0.0.1:8080/>, signed in as `ada@example.com` / `correct horse`.
+Browser on <http://127.0.0.1:8080/>. Seed the published fixture first with
+`POST /_test/reset` — nothing is seeded at container start, see `stage-4/RUN.md` — then
+sign in as `ada@example.com` / `correct horse`.
 
 Show three things, quickly:
 

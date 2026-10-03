@@ -63,7 +63,8 @@ what a clone actually contains. [`docs/harness-runs/`](docs/harness-runs/) has t
 `summary.json`, four `report.json` files and every per-suite log; its README explains why that
 distinction decides whether the run means anything.
 
-**Every number in this file and in FACTORY.md is checked against the evidence by
+**Every number in this file, in FACTORY.md, and in the deck and demo script under
+`docs/`, is checked against the evidence by
 [`verify_claims.py`](verify_claims.py), which CI runs.** It extracts each figure from
 `room.json`, the harness report and the git history, then fails if a document says anything
 else. [`docs/EVIDENCE.md`](docs/EVIDENCE.md) is the generated table of where each one comes

@@ -3,7 +3,10 @@
 
 A judge should not have to take a figure on trust, and neither should we. This reads
 `room.json`, the git history and the committed harness report, extracts what each one
-actually says, and then looks for that in `README.md` and `FACTORY.md`. A figure the
+actually says, and then looks for that in `README.md`, `FACTORY.md`, `docs/DECK.md` and
+`docs/DEMO_SCRIPT.md` — every document a judge reads, because the deck once claimed a
+rejection the room never issued and a stage count the harness had already superseded,
+and neither was in the checked set. A figure the
 evidence does not produce is printed back with the document, the line and what the
 evidence says instead.
 
@@ -34,7 +37,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent
 ROOM = ROOT / "room.json"
 RUNS = ROOT / "docs" / "harness-runs"
-DOCS = ("README.md", "FACTORY.md")
+DOCS = ("README.md", "FACTORY.md", "docs/DECK.md", "docs/DEMO_SCRIPT.md")
 
 # Sentences a seat is forbidden to post outright, from the message discipline section in
 # every mandate. Zero of these in the room is the measurable half of "silence is the

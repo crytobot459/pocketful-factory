@@ -9,28 +9,28 @@ number below disagrees with a document, the document is wrong.
 
 | Claim | What the evidence says | Source | In the documents |
 |---|---|---|---|
-| `room.total` | the room holds 113 messages | `room.json` | `FACTORY.md:155` |
+| `room.total` | the room holds 113 messages | `room.json` | `FACTORY.md:155`, `DEMO_SCRIPT.md:43` |
 | `room.scope` | the download is a full session, not a filtered one (scope "full") | `room.json` | `README.md:18` |
-| `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:161`, `FACTORY.md:13` |
+| `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:162`, `FACTORY.md:13` |
 | `room.text` | 49 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
 | `room.byseat` | the split across seats is 27 from the architect, 13 from the coder, 9 from the tester | `room.json` | `FACTORY.md:169` |
-| `room.accept` | 8 verdicts were ACCEPT | `room.json` | `FACTORY.md:100` |
-| `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100` |
-| `room.filler` | 0 of the seat messages is a filler message | `room.json` | `FACTORY.md:130` |
+| `room.accept` | 8 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:57`, `DEMO_SCRIPT.md:44` |
+| `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:57`, `DEMO_SCRIPT.md:63` |
+| `room.filler` | 0 of the seat messages is a filler message | `room.json` | `FACTORY.md:130`, `DEMO_SCRIPT.md:28` |
 | `room.tokens_in` | 221,701 input tokens | `room.json` | `FACTORY.md:171` |
 | `room.tokens_out` | 18,088 output tokens | `room.json` | `FACTORY.md:171` |
 | `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:173` |
 | `room.window` | the room window runs 2026-10-02 to 2026-10-03, about 25 hours | `room.json` | `FACTORY.md:168` |
 | `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:170` |
 | `harness.folders` | 4 stage folders were built and probed | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48` |
-| `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:53`, `FACTORY.md:50` |
-| `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48`, `FACTORY.md:46` |
-| `harness.mode` | the run was in isolated mode, in a clean container | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:32`, `FACTORY.md:33` |
-| `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46` |
+| `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:53`, `FACTORY.md:50`, `DECK.md:82` |
+| `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:48`, `FACTORY.md:46`, `DECK.md:78` |
+| `harness.mode` | the run was in isolated mode, in a clean container | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:32`, `FACTORY.md:33`, `DECK.md:64`, `DEMO_SCRIPT.md:95` |
+| `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46`, `DECK.md:78` |
 | `git.locks_exist` | every stage has a commit that both names and carries its lock (4/4) | `git log` | holds — evidence only, no document asserts it |
 | `git.locks_recorded` | FACTORY.md names the revision each stage locked at | `FACTORY.md` | `FACTORY.md:37` |
 | `git.history` | the history holds one commit per revision, not a single dump | `git log` | holds — evidence only, no document asserts it |
-| `git.history_stated` | the documents say the history is one commit per revision, not squashed | `README.md` | `README.md:72` |
+| `git.history_stated` | the documents say the history is one commit per revision, not squashed | `README.md` | `README.md:73` |
 | `stale.tokens_in` | the superseded token count 191,555 appears in no document | `git history` | clear |
 | `stale.tokens_out` | the superseded token count 16,068 appears in no document | `git history` | clear |
 | `stale.text_count` | the superseded seat-message count 41 appears in no document | `room.json` | clear |
