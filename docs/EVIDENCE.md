@@ -29,7 +29,7 @@ number below disagrees with a document, the document is wrong.
 | `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46` |
 | `git.locks_exist` | every stage has a commit that both names and carries its lock (4/4) | `git log` | holds — evidence only, no document asserts it |
 | `git.locks_recorded` | FACTORY.md names the revision each stage locked at | `FACTORY.md` | `FACTORY.md:37` |
-| `git.history` | the history is 34 commits for this entry, one per revision rather than a single dump | `git log` | holds — evidence only, no document asserts it |
+| `git.history` | the history holds one commit per revision, not a single dump | `git log` | holds — evidence only, no document asserts it |
 | `git.history_stated` | the documents say the history is one commit per revision, not squashed | `README.md` | `README.md:72` |
 | `stale.tokens_in` | the superseded token count 191,555 appears in no document | `git history` | clear |
 | `stale.tokens_out` | the superseded token count 16,068 appears in no document | `git history` | clear |

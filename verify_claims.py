@@ -328,6 +328,10 @@ def git_claims() -> list[dict]:
         dict(id="git.history", source="git log",
              states=f"the history is {f['own_commits']} commits for this entry, one per "
                     f"revision rather than a single dump",
+             # The count depends on where the repository sits, and this file is generated
+             # and byte-compared in CI, so the number stays out of it and in --list. A
+             # generated file that changes when you clone it is a file nobody trusts.
+             md="the history holds one commit per revision, not a single dump",
              evidence_only=True),
         dict(id="git.history_stated", source="README.md",
              states="the documents say the history is one commit per revision, not squashed",
@@ -494,7 +498,8 @@ def markdown() -> str:
         if claim.get("evidence_only"):
             facts = evidence_problems()
             ok = not any(f.split(":")[0] == claim["id"] for f in facts)
-            out.append(f"| `{claim['id']}` | {claim['states']} | `{claim['source']}` | "
+            out.append(f"| `{claim['id']}` | {claim.get('md') or claim['states']} | "
+                       f"`{claim['source']}` | "
                        f"{'holds' if ok else '**does not hold**'} — evidence only, no "
                        f"document asserts it |")
             continue
