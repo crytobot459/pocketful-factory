@@ -1,14 +1,23 @@
-# docs/templates — mẫu điền, KHÔNG phải nội dung nộp
+# docs/templates — khung điền, chưa phải nội dung nộp
 
-Các file trong thư mục này chuyển từ bản dự án cũ (`wearedevelopers-hackathon`,
-mô hình Mini Factory) sang làm **khung** cho submission của `pocketful-factory`.
+Những file ở đây chuyển từ cách tiếp cận cũ (một factory nhỏ tự sinh code từ
+một spec trang) sang làm **khung** cho việc chuẩn bị submission. Chúng mô tả
+hình dạng của một bài nộp, không mô tả factory của kho này.
 
-Chúng **không mô tả factory của bản này**. Trước khi nộp:
+Còn lại:
 
-- `SPEC.md` → xoá. Track `pocketful` có spec chính thức ở
-  `dark-factory-wearedevs/pocketful/spec/stage-*.md`. Mô tả factory thì nằm ở `FACTORY.md`.
-- `CONCEPT_SCORED.md`, `BRIEF.md` → viết lại cho factory thật, hoặc xoá.
-- `SUBMIT_DRAFT.md`, `DECK_OUTLINE.md`, `DEMO_SCRIPT.md`, `PITCH_SCRIPT.md`,
-  `SUBMIT_CHECKLIST.md`, `JUDGE_REPORT.md` → giữ làm checklist cấu trúc, nội dung phải viết lại.
+| File | Dùng làm gì | Phải làm lại |
+|---|---|---|
+| `SUBMIT_DRAFT.md` | khung tiêu đề + mô tả ngắn/dài cho trang nộp | viết lại theo factory thật |
+| `DECK_OUTLINE.md` | khung slide | viết lại |
+| `DEMO_SCRIPT.md` | khung kịch bản quay | viết lại |
+| `PITCH_SCRIPT.md` | khung lời thuyết trình | viết lại |
+| `SUBMIT_CHECKLIST.md` | danh sách kiểm tra trước khi nộp | dùng được |
+| `JUDGE_REPORT.md` | bản tự chấm trước khi nộp | dùng được |
 
-Nếu một file vẫn còn nội dung của mô hình cũ ở lúc nộp thì coi như nó chưa được viết.
+Đã xoá `SPEC.md`, `BRIEF.md`, `CONCEPT_SCORED.md` của bản cũ: track `pocketful`
+có spec chính thức do ban tổ chức phát hành, nên bản sao riêng của mô hình cũ
+chỉ làm người đọc hiểu nhầm. Mô tả factory nằm ở `FACTORY.md` ở thư mục gốc.
+
+Nếu một file trong thư mục này vẫn còn nội dung của mô hình cũ vào lúc nộp thì
+coi như nó chưa được viết.

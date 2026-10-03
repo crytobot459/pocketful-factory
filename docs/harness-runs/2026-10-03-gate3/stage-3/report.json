@@ -1,0 +1,103 @@
+{
+  "revision": "bea1c8a8069e256bce552960f56febcbd332e412",
+  "track": "pocketful",
+  "stages": {
+    "1": "pass",
+    "2": "pass",
+    "3": "pass"
+  },
+  "highest_contiguous": 3,
+  "started_at": "2026-10-03T01:26:27.653291+00:00",
+  "finished_at": "2026-10-03T01:28:28.558601+00:00",
+  "schema_version": 2,
+  "run_id": "6974ef6f0af042d1ad48b1cde2bb0f68",
+  "mode": "isolated",
+  "provenance": "working-tree",
+  "state": "completed",
+  "pytest_args": [],
+  "suite_digest": "487590736eb22edc40d0a5210fbad811823bf03e4ee91d57ba843bb577eb481e",
+  "checks": {
+    "1": {
+      "collected": 147,
+      "passed": 147,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_1/test_me_payments.py": {
+          "passed": 24,
+          "total": 24
+        },
+        "stage_1/test_requests_splits_feed.py": {
+          "passed": 39,
+          "total": 39
+        },
+        "stage_1/test_retries_splits_input.py": {
+          "passed": 51,
+          "total": 51
+        },
+        "stage_1/test_sample.py": {
+          "passed": 19,
+          "total": 19
+        },
+        "stage_1/test_seeded_state.py": {
+          "passed": 14,
+          "total": 14
+        }
+      }
+    },
+    "2": {
+      "collected": 35,
+      "passed": 35,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_2/test_sample.py": {
+          "passed": 10,
+          "total": 10
+        },
+        "stage_2/test_ui.py": {
+          "passed": 25,
+          "total": 25
+        }
+      }
+    },
+    "3": {
+      "collected": 6,
+      "passed": 6,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "deselected": 0,
+      "xfailed": 0,
+      "files": {
+        "stage_3/test_sample.py": {
+          "passed": 6,
+          "total": 6
+        }
+      }
+    }
+  },
+  "overshoot": null,
+  "claimed_stage": "3",
+  "share": 1.0,
+  "upgrade_sources": {
+    "2": {
+      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-1",
+      "revision": "bea1c8a8069e256bce552960f56febcbd332e412"
+    },
+    "3": {
+      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-2",
+      "revision": "bea1c8a8069e256bce552960f56febcbd332e412"
+    },
+    "4": {
+      "folder": "/Users/admin/harness/lablab-harness/build/pocketful-factory/stage-3",
+      "revision": "bea1c8a8069e256bce552960f56febcbd332e412"
+    }
+  }
+}

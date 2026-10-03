@@ -27,11 +27,24 @@ async def main() -> None:
         base_url=os.getenv("BAND_REST_URL", "https://app.band.ai").rstrip("/"),
     )
     try:
-        r = await client.agent_api_context.get_agent_chat_context(
-            ROOM, request_options=DEFAULT_REQUEST_OPTIONS,
-        )
+        # The context endpoint caps a page at 100 and returns the oldest page by
+        # default, so a room longer than that silently truncates at the front of
+        # the run. Walk the pages with a cursor until one comes back short.
+        raw, cursor = [], None
+        while True:
+            page = await client.agent_api_context.get_agent_chat_context(
+                ROOM, limit=100, cursor=cursor, request_options=DEFAULT_REQUEST_OPTIONS,
+            )
+            batch = page.data or []
+            raw.extend(batch)
+            if len(batch) < 100:
+                break
+            nxt = getattr(page, "next_cursor", None) or getattr(page, "cursor", None)
+            if not nxt or nxt == cursor:
+                break
+            cursor = nxt
         msgs = []
-        for m in (r.data or []):
+        for m in raw:
             ts = getattr(m, "inserted_at", "")
             msgs.append({
                 "id": getattr(m, "id", ""),
@@ -50,14 +63,14 @@ async def main() -> None:
         }
         with open(OUT, "w") as f:
             json.dump(room, f, ensure_ascii=False, indent=1)
-        agents = {x["senderId"] for x in msgs if x["senderType"] == "agent"}
-        texts = [x for x in msgs if x["senderType"] == "agent" and x["messageType"] == "text"]
-        print(f"saved {OUT} messages={len(msgs)} agent_seats={len(agents)} agent_texts={len(texts)}")
+        agents = {x["senderId"] for x in msgs if str(x["senderType"]).lower() == "agent"}
+        texts = [x for x in msgs
+                 if str(x["senderType"]).lower() == "agent" and x["messageType"] == "text"]
+        print(f"saved {OUT} messages={len(msgs)} agent_seats={len(agents)} "
+              f"agent_texts={len(texts)}")
     finally:
-        try:
-            await client.close()
-        except Exception:
-            pass
+        # This SDK version has no close(); the transport is released with the loop.
+        pass
 
 
 if __name__ == "__main__":
