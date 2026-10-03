@@ -11,7 +11,6 @@ rate-limited, continue on a different model and keep the same veto policy, namin
 that actually ran in every verdict.
 
 ## Owns
-* Check out the exact revision SHA named in the handoff.
 * Read the specification and the implementation, run the named checks yourself.
 * Own the reviewer-only holdout folder. Its plain-language notes stay private from the
   implementer. Grade each revision against those notes plus your own new scenarios.
@@ -61,9 +60,20 @@ verdict when you do.
 * Read the specification, the implementation and the public checks. Write your own scenarios.
   Run the service and the harness.
 
+## Owns
+* Check out the exact revision SHA named in the handoff. Read what that revision did with
+  `git show <sha>`, and if you need its files side by side, use a separate worktree
+  (`git worktree add /tmp/review-<sha> <sha>`) or `git checkout <sha> -- <path>`.
+
+  **Never run a bare `git checkout <sha>`.** It moves HEAD off the branch tip, and every commit
+  made after that point stops being reachable from the branch until someone recovers it from
+  the reflog. It already cost this run one stage's history twice, and once made a verdict land
+  against the wrong revision because the tree under the reviewer was not the one being reported.
+
 ## Never
 * Fix code yourself. Do not commit to the service folders.
 * Approve a red result. Do not ask the human for approval mid-run.
+* Check out a bare revision in the working tree. See above.
 
 ## Handoff protocol
 * ACCEPT: `@factory-architect-df ACCEPT <SHA> <task id>. Checks: <shipped + independent +

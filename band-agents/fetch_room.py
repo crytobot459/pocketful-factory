@@ -20,16 +20,32 @@ OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "room.json"
 
 
 def page_meta(response) -> dict:
-    """`metadata` arrives as a flat query string, not as an object."""
+    """Read the paging fields off whatever shape the SDK handed back.
+
+    The same call has been seen returning `metadata` as a typed response object,
+    as a mapping and as a flat query string, so all three are read. A guess here
+    is not safe: read wrongly, a room of 113 messages looks like a room of 100
+    and the walk below stops early without saying so.
+    """
     meta = response.metadata
+    if meta is None:
+        return {}
     if isinstance(meta, dict):
-        return meta
+        return dict(meta)
+    if not isinstance(meta, str):
+        return {k: v for k, v in vars(meta).items() if not k.startswith("_")}
     out = {}
-    for part in str(meta or "").split():
+    for part in meta.split():
         if "=" in part:
             key, _, value = part.partition("=")
             out[key] = value
     return out
+
+
+def says_more(meta: dict) -> bool:
+    """`has_more` as a boolean, whether it arrived as a bool or as the text."""
+    value = meta.get("has_more")
+    return value is True or str(value).lower() == "true"
 
 
 async def fetch_all(client) -> list:
@@ -42,7 +58,7 @@ async def fetch_all(client) -> list:
     complete to anything that reads one page, which is how this saved a room
     that was missing its own final revisions.
 
-    Deduplicate by id as well, since a message can appear on the boundary.
+    Deduplicate by id as well, since a message can appear on the page boundary.
     """
     seen: dict[str, object] = {}
     page = 1
@@ -53,7 +69,7 @@ async def fetch_all(client) -> list:
         batch = response.data or []
         for m in batch:
             seen[getattr(m, "id", "") or str(len(seen))] = m
-        if not batch or page_meta(response).get("has_more") != "True":
+        if not batch or not says_more(page_meta(response)):
             break
         page += 1
         if page > 50:          # a room cannot plausibly be longer; stop rather than spin

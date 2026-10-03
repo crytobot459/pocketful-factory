@@ -32,32 +32,31 @@ same roster.
 Four stages of the `pocketful` wallet specification. Each folder is a complete service that
 builds from a clean container and passes every earlier suite as well as its own.
 
-| Stage | Folder | Locked at | Shipped checks against it |
+| Stage | Folder | Locked at | Shipped checks run against it |
 |---|---|---|---|
-| 1 | `stage-1/` | `35e2fa1` | 147/147 |
+| 1 | `stage-1/` | `35e2fa1` | 147 / 147 |
 | 2 | `stage-2/` | `bea1c8a` | 147 + 35 |
 | 3 | `stage-3/` | `92d9a5f` | 147 + 35 + 6 |
-| 4 | `stage-4/` | see `docs/harness-runs/` | — |
+| 4 | `stage-4/` | `b88cb7b` | 147 + 35 + 6 + 5 |
 
 Verified by the event harness, not by us:
 
 ```
 python -m harness run --track pocketful --repo . --all --mode isolated
-  stage-1/: claims stage 1 on the shipped checks
-  stage-2/: claims stage 2 on the shipped checks
-  stage-3/: claims stage 3 on the shipped checks
-  highest contiguous stage: 3
+  stage-1/: claims stage 1 on the shipped checks   share 1.0
+  stage-2/: claims stage 2 on the shipped checks   share 1.0
+  stage-3/: claims stage 3 on the shipped checks   share 1.0
+  stage-4/: claims stage 4 on the shipped checks   share 1.0
+  highest contiguous stage: 4
 ```
 
-The full report is kept in `docs/harness-runs/`. Every folder scored `share 1.0` and no folder
-passed the next stage's whole suite, so none of them is a later answer filed in the wrong place.
+Every folder scored `share 1.0` and no folder passed the next stage's whole suite, so none of
+them is a later answer filed in the wrong place. The full report is in `docs/harness-runs/`.
 
 **What that number is worth, stated plainly.** The event ships only part of each stage's
-checks. Stage 1's 147 and stage 2's 35 are a real sample of the grading suite. Stage 3's is
-**6 checks**, and stage 4's shipped sample is smaller still. So "claims stage 3" means six
-published checks plus whatever the reviewer's own adversarial notes found, not a stage 3 the
-judges' full suite will confirm. Read the reviewer's counts below for what was actually
-independent of the shipped checks.
+checks. Stage 1's 147 and stage 2's 35 are a real sample of the grading suite. Stage 3 ships 6
+checks and stage 4 ships 5, so for those two the harness result is close to a smoke test. What
+carries them is the reviewer's own adversarial work below, not the five and six.
 
 ## 3. Design choices, and what they cost
 
@@ -89,6 +88,12 @@ produced, beyond the shipped checks:
   combined with a range; another person's snapshot is not readable; a view pinned to an instant
   does not move when a correction lands afterwards; arithmetic in a statement reconciles against
   balances; conservation holds at the end of the run.
+- stage 4 — S4-H1..S4-H10: the refund cap follows the *corrected* amount, not the original, so
+  a correction downward makes an over-refund fail; refunding a refund is refused; a correction
+  cannot be applied to a refund; a correction cannot take a payment below what has already been
+  refunded; a refund moves from available and not from held; only the receiver may refund; a
+  batch correction touching one member of a settlement changes nothing at all; a batch that is
+  unaffordable across its members applies none of it.
 
 **Explicit message discipline, because the first attempt at this failed.** The run this factory
 submitted before had 482 messages in it, of which the reviewer wrote five, and roughly half were
