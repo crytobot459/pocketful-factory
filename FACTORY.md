@@ -173,8 +173,12 @@ should save another team from rediscovering.
   acceptance of the right revision and the stage-4 lock that followed were both missing. Every
   document here described a finished run while the file showed the broken middle of one. The
   export now reaches the end, and `verify_claims.py` fails on one that does not.
-- 121 messages: 52 seat messages (28 architect, 13 coder, 11 tester), the rest tool calls, tool
-  results and usage events. Ten verdicts, all ACCEPT; seven stage locks.
+- The export `room.json`: 121 messages, 52 of them seat messages (28 architect, 13 coder, 11 tester);
+  the rest are tool calls, tool results and usage events. Ten verdicts, all ACCEPT; seven stage locks
+  across four stages, because a stage is locked again when a defect is found and then fixed. The
+  export is not the whole room and does not claim to be: the room holds more than two thousand
+  messages, and `jam room messages --type text --page 1` returns 53 seat messages, 9 of them
+  verdicts, over five revisions. Both counts are here because both are true of different things.
 - Tokens the room recorded: 294,064 in / 18,549 out, all attributed to the architect seat. The
   coder and tester seats report usage through their own adapters and their counts are not in the
   room log, so these are a floor, not a total. `python3 demo.py` recomputes this figure live from

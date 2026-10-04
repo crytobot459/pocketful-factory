@@ -80,8 +80,10 @@ It prints and reads out: the seats and their models, the room's message count an
 across them, the stages each locked at, the verdicts, the token usage, and what the event
 harness said.
 
-> The room is 121 messages. Fifty-two of them are the agents speaking, split 28, 13 and 11.
-> Ten verdicts. Seven stages locked.
+> The export we committed is 121 messages, 52 of them the agents speaking, split 28, 13 and 11.
+> Ten verdicts, all ACCEPT, and seven stage locks across four stages. The room itself is larger
+> than its export — more than two thousand messages — and BAND's own text view of it counts nine
+> verdicts over five revisions.
 
 ## 2:00 — The reviewer catching something
 
@@ -103,9 +105,10 @@ git log --oneline -- stage-4/src/app.py
 > Across the four stages it found six, and the list with the revision each was locked at is
 > slide 4 of the deck.
 >
-> Say it plainly: in this run the reviewer never vetoed. Ten verdicts, all ACCEPT — the
-> findings arrived attached to acceptances. The veto is still untested, and that is in the
-> factory document rather than hidden from it.
+> Say it plainly: in this run the reviewer never vetoed. Every verdict the room carries is an
+> ACCEPT, each naming the revision it was issued against — the findings arrived attached to
+> acceptances. The veto is still untested, and that is in the factory document rather than
+> hidden from it.
 
 ## 2:30 — The service the factory built
 

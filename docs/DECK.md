@@ -57,7 +57,8 @@ that the published checks never asked for:
 Six, and each one is a commit whose subject says what changed — `4004384` names three of them
 in a single line. Each was reported with numbers, and the fixes came back through the room as
 new commits — but as acceptances with findings attached, not as vetoes. In this run the
-reviewer never rejected anything: ten verdicts, all ACCEPT. The veto the factory is built
+reviewer never rejected anything: every verdict the room carries is an ACCEPT, each naming the
+revision it was issued against. The veto the factory is built
 around is still untested in this room, and that is stated in FACTORY.md §4 rather than left
 for a judge to discover.
 

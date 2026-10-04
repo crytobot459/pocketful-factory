@@ -14,19 +14,19 @@ number below disagrees with a document, the document is wrong.
 | `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:250`, `FACTORY.md:13` |
 | `room.text` | 52 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
 | `room.byseat` | the split across seats is 28 from the architect, 13 from the coder, 11 from the tester | `room.json` | `FACTORY.md:176` |
-| `room.accept` | 10 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:60`, `DEMO_SCRIPT.md:84` |
-| `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100`, `DECK.md:60`, `DEMO_SCRIPT.md:106` |
+| `room.accept` | 10 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DEMO_SCRIPT.md:84` |
+| `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100`, `DEMO_SCRIPT.md:84` |
 | `room.filler` | 0 of the seat messages is a filler message | `room.json` | `FACTORY.md:130`, `DEMO_SCRIPT.md:22` |
-| `room.tokens_in` | 294,064 input tokens | `room.json` | `FACTORY.md:178` |
-| `room.tokens_out` | 18,549 output tokens | `room.json` | `FACTORY.md:178` |
-| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:180` |
+| `room.tokens_in` | 294,064 input tokens | `room.json` | `FACTORY.md:182` |
+| `room.tokens_out` | 18,549 output tokens | `room.json` | `FACTORY.md:182` |
+| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:184` |
 | `room.window` | the room window runs 2026-10-02 to 2026-10-03, about 25 hours | `room.json` | `FACTORY.md:168` |
-| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:177` |
+| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:177`, `DEMO_SCRIPT.md:84` |
 | `harness.folders` | 4 stage folders were built and probed | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:69` |
-| `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:74`, `FACTORY.md:50`, `DECK.md:90`, `DEMO_SCRIPT.md:144` |
-| `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:69`, `FACTORY.md:46`, `DECK.md:86` |
-| `harness.mode` | the run was in isolated mode, in a clean container | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:32`, `FACTORY.md:33`, `DECK.md:72`, `DEMO_SCRIPT.md:46` |
-| `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46`, `DECK.md:86` |
+| `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:74`, `FACTORY.md:50`, `DECK.md:91`, `DEMO_SCRIPT.md:147` |
+| `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:69`, `FACTORY.md:46`, `DECK.md:87` |
+| `harness.mode` | the run was in isolated mode, in a clean container | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:32`, `FACTORY.md:33`, `DECK.md:73`, `DEMO_SCRIPT.md:46` |
+| `harness.claimed` | every folder claimed its own stage | `docs/harness-runs/2026-10-03-final/summary.json` | `FACTORY.md:46`, `DECK.md:87` |
 | `git.locks_exist` | every stage has a commit that both names and carries its lock (4/4) | `git log` | holds — evidence only, no document asserts it |
 | `git.locks_recorded` | FACTORY.md names the revision each stage locked at | `FACTORY.md` | `FACTORY.md:37` |
 | `git.history` | the history holds one commit per revision, not a single dump | `git log` | holds — evidence only, no document asserts it |
