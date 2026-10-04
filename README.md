@@ -110,6 +110,46 @@ harness said. Every figure it speaks is parsed out of `room.json`, the git histo
 `--no-speak` prints without speaking. `--save DIR` keeps the audio as numbered files, which is
 what the video edit wants.
 
+## Seeing it on a public URL, with nothing installed
+
+The service is four files and two pip packages, so a public copy is one command and no
+account. `cloudflared` gives a real HTTPS URL:
+
+```bash
+cd stage-4 && pip install -r requirements.txt && PORT=8080 python3 -m src.app &
+cloudflared tunnel --url http://127.0.0.1:8080        # prints a trycloudflare.com URL
+```
+
+Then, from anywhere:
+
+```bash
+URL=https://<whatever it printed>
+curl -s $URL/health                                   # {"status":"ok"}
+
+curl -s -X POST $URL/_test/reset -H 'Content-Type: application/json' -d '{
+  "currency": "EUR", "minor_units": 2,
+  "users": [
+    { "id": "u_ada", "email": "ada@example.com", "password": "correct horse",
+      "display_name": "Ada", "handle": "ada", "balance": 10000 },
+    { "id": "u_bob", "email": "bob@example.com", "password": "correct horse",
+      "display_name": "Bob", "handle": "bob", "balance": 2500 }
+  ],
+  "payments": [
+    { "id": "p_1", "from_user_id": "u_ada", "to_user_id": "u_bob",
+      "amount": 500, "note": "coffee", "visibility": "public" }
+  ],
+  "requests": [
+    { "id": "rq_1", "requester_id": "u_bob", "payer_id": "u_ada",
+      "amount": 1200, "note": "taxi", "status": "pending" }
+  ]
+}'
+open $URL        # sign in as ada@example.com / correct horse
+```
+
+No URL is committed here on purpose: a tunnel dies with the machine that made it, and a
+link that 404s when you click it is worse than the two commands above. The submission video
+shows one, live.
+
 ## Running a stage yourself
 
 No account, no keys, no Docker needed for a quick look:
