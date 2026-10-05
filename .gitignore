@@ -14,7 +14,13 @@ venv/
 .venv/
 .DS_Store
 out/
+# `*.log` is runtime output everywhere except one place. `README.md` sends a judge to
+# `docs/harness-runs/` for the per-suite pytest logs, and that promise was empty: the rule
+# below swallowed all thirteen of them, so a clone got the table of contents and none of the
+# evidence. They are 56K in total and they are the reason the run is kept rather than
+# summarised.
 *.log
+!docs/harness-runs/**/*.log
 room.*.json
 room.download.json
 band-agents/.venv/

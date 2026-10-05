@@ -127,9 +127,16 @@ submitted before had 482 messages in it, of which the reviewer wrote five, and r
 sentences announcing that the sender was waiting. Every mandate now names the sentences that
 are forbidden outright — "Standing by", "Noted", "Acknowledged", "Quiet", "Holding",
 "Waiting" — and states that silence, not a placeholder, is the correct output. The run in
-`room.json` has 52 seat messages, none of them a filler, and every one of them carries a
-revision, a count or a verdict. Both halves of that are checked, not asserted: `verify_claims.py`
-counts the sentences each mandate forbids and fails if one appears in the room.
+`room.json` has 52 seat messages, and nine of them are a filler line — a seat saying it is
+holding silence, or standing by, or noted-pending-verdict. They are all in the first dozen
+messages of the transcript, and this paragraph used to claim that none of them was a filler.
+That claim was wrong, and the check that was supposed to catch it was not measuring anything:
+the pattern was anchored at the start of the stored content, and every message in this room
+opens with an `@[[uuid]]` mention, so the count came out zero on a room that holds nine. Both
+halves are measured now rather than asserted — `verify_claims.py` strips the mention and the
+wrapping brackets, counts the sentences each mandate forbids, and fails unless this document
+names the number it found. Nine is still down from 482, and the other 43 messages each carry a
+revision, a count or a verdict.
 
 **Free tiers only.** Cost to run the whole thing: $0. The seats run on OpenCode's free models
 and a Gemini key, all of which rate-limit. Fallback is declared per seat in

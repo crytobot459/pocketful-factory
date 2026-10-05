@@ -79,7 +79,7 @@ a smoke test. What carries those two is the reviewer's own adversarial work in
 not worth.
 
 The run is kept rather than summarised, and it was taken against an export of the **committed**
-tree rather than the working directory — 90 files, no `.env`, no virtualenv, no logs, which is
+tree rather than the working directory — 106 files, no `.env`, no virtualenv, which is
 what a clone actually contains. [`docs/harness-runs/`](docs/harness-runs/) has the
 `summary.json`, four `report.json` files and every per-suite log; its README explains why that
 distinction decides whether the run means anything.

@@ -40,12 +40,27 @@ RUNS = ROOT / "docs" / "harness-runs"
 DOCS = ("README.md", "FACTORY.md", "docs/DECK.md", "docs/DEMO_SCRIPT.md")
 
 # Sentences a seat is forbidden to post outright, from the message discipline section in
-# every mandate. Zero of these in the room is the measurable half of "silence is the
-# default"; the other half is that every text message carries something.
+# every mandate. Matching one needs the mention prefix off first: every message in this room
+# opens with an `@[[uuid]]`, so a pattern anchored at the start of the stored content matched
+# nothing at all, and this check reported zero on a room that holds nine of them. A checker
+# that cannot fail is the same defect as a claim nothing tests.
 FILLER = re.compile(
-    r"^(standing by|noted|acknowledged|quiet|no action|holding|waiting|silence)\b", re.I)
+    r"^(standing by|staying silent|noted|acknowledged|quiet|no action|holding|waiting"
+    r"|silence)\b", re.I)
+MENTION = re.compile(r"@\S+\s*")
 TOKEN_USAGE = re.compile(r"Token usage: input=(\d+) output=(\d+)")
 VERDICT = re.compile(r"^(?:@\S+\s+)*(ACCEPT|REJECT)\b")
+
+
+def _filler_head(content: str) -> str:
+    """The message as a reader meets the sentence, not as the room stores it.
+
+    Mentions come off, and so does the punctuation a seat wraps a status line in:
+    `(Acknowledged — silent.)` is the forbidden sentence with brackets around it, and a
+    pattern that stops at the bracket calls it clean.
+    """
+    return MENTION.sub(" ", " ".join(str(content or "").split())).strip(
+        "()[]{}<>*_ \t-:.!,")
 
 # Each stage was locked by a commit whose subject says so. Matched on the subject rather
 # than on a hash, because a hash is a property of one repository and not of the work: this
@@ -127,7 +142,7 @@ def room_claims() -> list[dict]:
         hit = VERDICT.match(head)
         if hit:
             verdicts[hit.group(1)] += 1
-        if FILLER.match(head):
+        if FILLER.match(_filler_head(m.get("content", ""))):
             filler += 1
 
     architect = max(by_seat, key=lambda s: by_seat[s]) if by_seat else ""
@@ -193,12 +208,18 @@ def room_claims() -> list[dict]:
                   r"\b%d rejections?\b" % verdicts["REJECT"],
                   r"all (?:%s |\d+ )?ACCEPT" % _word(verdicts["ACCEPT"])]),
 
+        # The count is nine, and the documents say so. What this used to accept was the
+        # opposite: a bare `if filler else` meant the claim only ever bound when the room was
+        # clean, so the room stopped being clean and the checker quietly stopped asking --
+        # which is how `FACTORY.md` came to write "none of them a filler" and pass. The
+        # sentence has to name the number whichever way the number came out.
         dict(id="room.filler", source="room.json",
-             states=f"{filler} of the seat messages is a filler message",
-             near=r"filler|carries|pings|placeholder",
-             any=[r"\b%d filler\b" % filler] if filler else
-                  [r"not a single filler", r"every one of them carries",
-                   r"no filler message", r"0 filler", r"carries a revision, a count"]),
+             states=f"{filler} of the {len(texts)} seat messages is a forbidden status line",
+             near=r"filler|silence|silent|ping|placeholder|carries",
+             any=[r"\b(?:%d|%s)\b[^\n]*\b(?:filler|silence|silent|ping)s?\b"
+                  % (filler, _word(filler)),
+                  r"\b(?:filler|silence|silent|ping)s?\b[^\n]*\b(?:%d|%s)\b"
+                  % (filler, _word(filler))]),
 
         dict(id="room.tokens_in", source="room.json",
              states=f"{tokens_in:,} input tokens",

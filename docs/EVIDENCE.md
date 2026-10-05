@@ -9,19 +9,19 @@ number below disagrees with a document, the document is wrong.
 
 | Claim | What the evidence says | Source | In the documents |
 |---|---|---|---|
-| `room.total` | the room holds 121 messages | `room.json` | `FACTORY.md:176`, `DEMO_SCRIPT.md:83` |
-| `room.scope` | the export runs to the end of the room: it carries the final stage lock | `room.json` | `README.md:27`, `FACTORY.md:169` |
+| `room.total` | the room holds 121 messages | `room.json` | `FACTORY.md:183`, `DEMO_SCRIPT.md:83` |
+| `room.scope` | the export runs to the end of the room: it carries the final stage lock | `room.json` | `README.md:27`, `FACTORY.md:176` |
 | `room.seats` | 3 distinct agent seats are in the room | `room.json` | `README.md:250`, `FACTORY.md:13` |
 | `room.text` | 52 of those messages are the seats speaking | `room.json` | `FACTORY.md:130` |
-| `room.byseat` | the split across seats is 28 from the architect, 13 from the coder, 11 from the tester | `room.json` | `FACTORY.md:176` |
+| `room.byseat` | the split across seats is 28 from the architect, 13 from the coder, 11 from the tester | `room.json` | `FACTORY.md:183` |
 | `room.accept` | 10 verdicts were ACCEPT | `room.json` | `FACTORY.md:100`, `DEMO_SCRIPT.md:84` |
 | `room.reject` | 0 verdicts were REJECT -- every verdict was ACCEPT | `room.json` | `FACTORY.md:100`, `DEMO_SCRIPT.md:84` |
-| `room.filler` | 0 of the seat messages is a filler message | `room.json` | `FACTORY.md:130`, `DEMO_SCRIPT.md:22` |
-| `room.tokens_in` | 294,064 input tokens | `room.json` | `FACTORY.md:182` |
-| `room.tokens_out` | 18,549 output tokens | `room.json` | `FACTORY.md:182` |
-| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:184` |
-| `room.window` | the room window runs 2026-10-02 to 2026-10-03, about 25 hours | `room.json` | `FACTORY.md:168` |
-| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:177`, `DEMO_SCRIPT.md:84` |
+| `room.filler` | 9 of the 52 seat messages is a forbidden status line | `room.json` | `FACTORY.md:130` |
+| `room.tokens_in` | 294,064 input tokens | `room.json` | `FACTORY.md:189` |
+| `room.tokens_out` | 18,549 output tokens | `room.json` | `FACTORY.md:189` |
+| `room.floor` | the token count is a floor, not a total, because the other two seats report usage through their own adapters | `room.json` | `FACTORY.md:191` |
+| `room.window` | the room window runs 2026-10-02 to 2026-10-03, about 25 hours | `room.json` | `FACTORY.md:175` |
+| `room.locks` | 7 stage locks are announced in the room | `room.json` | `FACTORY.md:184`, `DEMO_SCRIPT.md:84` |
 | `harness.folders` | 4 stage folders were built and probed | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:69` |
 | `harness.contiguous` | highest contiguous stage is 4 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:74`, `FACTORY.md:50`, `DECK.md:91`, `DEMO_SCRIPT.md:147` |
 | `harness.share` | every folder scored share 1.0 | `docs/harness-runs/2026-10-03-final/summary.json` | `README.md:69`, `FACTORY.md:46`, `DECK.md:87` |

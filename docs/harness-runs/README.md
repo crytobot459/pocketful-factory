@@ -49,9 +49,15 @@ git archive --format=tar HEAD:build/pocketful-factory | tar -x -C <dir>
 python3 harness run --track pocketful --repo <dir> --all --mode isolated
 ```
 
-90 files, exactly the committed set, with no `.env`, no `agent_config.yaml`, no virtualenv
-and no logs. `harness check` reports **0 problems** on that same directory, which is the
+90 files, exactly the committed set at the time, with no `.env`, no `agent_config.yaml` and no
+virtualenv. `harness check` reports **0 problems** on that same directory, which is the
 offline half of gates 1, 2 and 4.
+
+The export was taken before the thirteen per-suite logs were committed, which is why the
+sentence above still says 90 while the repository now holds 106: adding the logs changed what a
+clone contains. That is the honest history of the gap rather than a corrected number — the run
+itself was against the 90-file tree, and the logs under `2026-10-03-final/` are the output of
+that run, committed afterwards so that a judge does not have to take the summary on trust.
 
 `report.json` records `revision: ""`, and that is honest rather than a gap: the export is not
 a git checkout, so there is no commit hash to read. The commit it corresponds to is the one
