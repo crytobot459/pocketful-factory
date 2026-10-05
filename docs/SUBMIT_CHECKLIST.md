@@ -120,7 +120,7 @@ push if it is not.
 | Cover image | `docs/cover.png` (1920x1080) |
 | Video presentation | the video file, uploaded separately from the slides |
 | Slide presentation | `docs/DECK.pdf`, 11 slides at 1280x720 CSS px (a 960x540 pt page — same 16:9) |
-| Repository | `https://github.com/crytobot459/pocketful-factory` (public, 42 commits, CI green) |
+| Repository | `https://github.com/crytobot459/pocketful-factory`, public, CI green |
 | Demo Application Platform | `Streamlit` |
 | Demo Application URL | the deployed `https://<app>.streamlit.app` |
 
