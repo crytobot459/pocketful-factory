@@ -1,0 +1,27 @@
+$ docker run --rm --network df-run-b2977368524f45b480832edef2e1001d -v /Users/admin/dark-factory-wearedevs:/work:ro -v /Users/admin/dark-factory-wearedevs/runs/final-20261003-155747/stage-3:/out -e PYTHONDONTWRITEBYTECODE=1 -e PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 -e COLUMNS=200 -w /work df-harness-runner python -m pytest pocketful/test/stage_4 --base-url http://df-svc-9dd2301387d7:8080 -p harness.plugin --rootdir pocketful/test -q -x --previous-base-url http://df-svc-9dd2301387d7:8080 --harness-summary /out/stage-4.counts.json
+
+F
+=============================================================================================== FAILURES ===============================================================================================
+_______________________________________________________________________________ test_other_payments_carry_refund_of_null _______________________________________________________________________________
+
+world = namespace(ada=<harness.http.Api object at 0x7ffb2fe6f0b0>, bob=<harness.http.Api object at 0x7ffb2f25f2f0>)
+
+>   ???
+E   KeyError: 'refund_of'
+
+/Users/admin/dark-factory-wearedevs/pocketful/test/stage_4/test_sample.py:44: KeyError
+=========================================================================================== warnings summary ===========================================================================================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:469
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:469: PytestCacheWarning: cache could not write path /work/pocketful/test/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/work/pocketful/test/.pytest_cache/v/cache/nodeids'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:423
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:423: PytestCacheWarning: cache could not write path /work/pocketful/test/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/work/pocketful/test/.pytest_cache/v/cache/lastfailed'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================================================================================= short test summary info ========================================================================================
+FAILED pocketful/test/stage_4/test_sample.py::test_other_payments_carry_refund_of_null - KeyError: 'refund_of'
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 warnings in 0.18s
+

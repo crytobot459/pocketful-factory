@@ -1,0 +1,34 @@
+$ docker run --rm --network df-run-567d66f1d3114f34bb13e0143ac855bb -v /Users/admin/dark-factory-wearedevs:/work:ro -v /Users/admin/dark-factory-wearedevs/runs/final-20261003-155747/stage-2:/out -e PYTHONDONTWRITEBYTECODE=1 -e PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 -e COLUMNS=200 -w /work df-harness-runner python -m pytest pocketful/test/stage_3 --base-url http://df-svc-bb0f493eff47:8080 -p harness.plugin --rootdir pocketful/test -q -x --previous-base-url http://df-svc-bb0f493eff47:8080 --harness-summary /out/stage-3.counts.json
+
+..F
+=============================================================================================== FAILURES ===============================================================================================
+___________________________________________________________________________ test_as_of_in_the_future_is_the_current_balance ____________________________________________________________________________
+
+world = namespace(fixture={'currency': 'EUR', 'minor_units': 2, 'users': [{'id': 'u_ada', 'email': 'ada@example.com', 'passwor...ct at 0x7fbbe9d02960>, bob=<harness.http.Api object at 0x7fbbe9157d10>, cy=<harness.http.Api object at 0x7fbbe9159a00>)
+balance = <function balance.<locals>._balance at 0x7fbbe900d080>
+
+    def test_as_of_in_the_future_is_the_current_balance(world, balance):
+        now = dt.datetime.now(dt.timezone.utc)
+        later = (now + dt.timedelta(hours=1)).isoformat()
+        body = assert_status(world.ada.get("/me", params={"as_of": later}), 200).json()
+        assert body["balance"] == balance(world.ada)
+>       assert body["as_of"] == later
+               ^^^^^^^^^^^^^
+E       KeyError: 'as_of'
+
+pocketful/test/stage_3/test_sample.py:35: KeyError
+=========================================================================================== warnings summary ===========================================================================================
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:469
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:469: PytestCacheWarning: cache could not write path /work/pocketful/test/.pytest_cache/v/cache/nodeids: [Errno 30] Read-only file system: '/work/pocketful/test/.pytest_cache/v/cache/nodeids'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+../usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:423
+  /usr/local/lib/python3.12/site-packages/_pytest/cacheprovider.py:423: PytestCacheWarning: cache could not write path /work/pocketful/test/.pytest_cache/v/cache/lastfailed: [Errno 30] Read-only file system: '/work/pocketful/test/.pytest_cache/v/cache/lastfailed'
+    config.cache.set("cache/lastfailed", self.lastfailed)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================================================================================= short test summary info ========================================================================================
+FAILED pocketful/test/stage_3/test_sample.py::test_as_of_in_the_future_is_the_current_balance - KeyError: 'as_of'
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1 failed, 2 passed, 2 warnings in 0.46s
+
