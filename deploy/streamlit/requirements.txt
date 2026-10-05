@@ -1,0 +1,9 @@
+# Streamlit Community Cloud, plus stage-4's own dependencies.
+#
+# The FastAPI and uvicorn lines are not there for the UI: `streamlit_app.py` starts
+# `src.app` as a subprocess and drives it over HTTP, so the service under the page is the
+# module the factory produced rather than a reimplementation of it.
+streamlit==1.40.2
+requests==2.32.3
+fastapi==0.115.6
+uvicorn==0.34.0

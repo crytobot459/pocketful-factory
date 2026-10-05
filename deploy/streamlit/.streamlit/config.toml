@@ -1,0 +1,14 @@
+[server]
+headless = true
+# Streamlit Cloud assigns the port; this only stops the local run from opening a browser.
+fileWatcherType = "none"
+
+[browser]
+gatherUsageStats = false
+
+[theme]
+base = "dark"
+primaryColor = "#3fb950"
+backgroundColor = "#0d1117"
+secondaryBackgroundColor = "#161b22"
+textColor = "#e6edf3"
