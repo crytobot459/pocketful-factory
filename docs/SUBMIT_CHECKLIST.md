@@ -78,25 +78,58 @@ A checklist, in the order the failures actually happen. Each step names the thin
 - [ ] The presentation covers the factory design, what it cost, a bad result it caught, and the
       stage it reached.
 
+## The demo URL
+
+- [ ] `crytobot459/pocketful-demo` is public and its default branch is `main`, with
+      `streamlit_app.py` at the **root**. The deploy form asks for a repository, a branch and
+      a main file path, and all three are validated against each other: pointing it at
+      `crytobot459/pocketful-factory` gives "this branch does not exist" and "this file does
+      not exist", because that repository has no `streamlit_app.py` and its branch is `main`.
+- [ ] `bash deploy/build_demo_repo.sh --check-only` is green **before** anything is pushed. It
+      drives the page itself, not the functions behind it, and it covers a first visitor and a
+      second one on the same service.
+- [ ] Open the deployed URL and click Seed, Sign in as Ada, Fire it twice. Then reload and do
+      it again. A URL that only works once is not a demo URL, and this is a public one: the
+      free tier sleeps, the first request after a pause takes 30-60 seconds, and the service is
+      one wallet shared by every visitor, so seeding is what puts it back to `EUR 100.00`.
+- [ ] Say the sleep in the form. A judge who opens a 40-second blank page concludes the demo is
+      broken, and nothing in the submission is worth more at that moment than the first click.
+
 ## The form, field by field
 
-The event's form is `https://lablab.ai/ai-hackathons/wearedevelopers-hackathon` and it takes
-exactly eight fields. There is **no demo URL field** on this one, so do not go looking for one.
+The form is `https://lablab.ai/ai-hackathons/wearedevelopers-hackathon` reached from the team
+page, and it is three steps: basic information, media, then the submission itself.
+
+**It does ask for a demo URL.** An earlier draft of this file said it did not, and that was
+wrong — it was written from memory of the event page rather than from the form, and it would
+have sent the submission in with a required field empty. The wallet is a FastAPI service, not
+a Streamlit app, so the demo is `crytobot459/pocketful-demo`: `streamlit_app.py` at the root
+starts `stage-4/src/app.py` as a subprocess and drives it over HTTP. `deploy/` holds the source
+of that page and `deploy/build_demo_repo.sh` assembles, checks and pushes it. The service
+under the page is byte-identical to the stage in this repository, and the build refuses to
+push if it is not.
 
 | Field | Value |
 |---|---|
 | Submission title | `Pocketful Factory: three agents, one room` (41 of 50) |
 | Short description | 249 of 255, below |
 | Long description | 1862 of 2000, below |
+| Categories | `Coding` |
 | Event Tracks | `pocketful` |
-| Technologies Used | `python`, `ai-agents`, `multi-agent`, `docker`, `agent-harness` |
+| Technologies Used | `Band Intergrations`, `Band Agentic Mesh`, `Band Control Plane` |
 | Cover image | `docs/cover.png` (1920x1080) |
 | Video presentation | the video file, uploaded separately from the slides |
-| Slide presentation | `docs/DECK.pdf`, 11 pages at 1280x720 |
+| Slide presentation | `docs/DECK.pdf`, 11 slides at 1280x720 CSS px (a 960x540 pt page — same 16:9) |
 | Repository | `https://github.com/crytobot459/pocketful-factory` (public, 42 commits, CI green) |
+| Demo Application Platform | `Streamlit` |
+| Demo Application URL | the deployed `https://<app>.streamlit.app` |
 
 The form measures **50 characters** on the title and **2000** on the long description, so both
 of the drafts that read better are wrong for this form and are not the ones below.
+
+The form's technologies list is fixed and the entries above are the whole of it: an earlier
+draft here listed `python`, `ai-agents`, `multi-agent`, `docker` and `agent-harness`, none of
+which the form offers. Everything it does offer names BAND, which is the point.
 
 **Long description** (paste exactly, 1862 characters):
 
