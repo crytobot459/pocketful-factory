@@ -85,31 +85,36 @@ exactly eight fields. There is **no demo URL field** on this one, so do not go l
 
 | Field | Value |
 |---|---|
-| Project title | `Pocketful Factory — three coding agents, one BAND room, four stages` |
+| Submission title | `Pocketful Factory: three agents, one room` (41 of 50) |
+| Short description | 249 of 255, below |
+| Long description | 1862 of 2000, below |
+| Event Tracks | `pocketful` |
+| Technologies Used | `python`, `ai-agents`, `multi-agent`, `docker`, `agent-harness` |
 | Cover image | `docs/cover.png` (1920x1080) |
-| Video presentation | `docs/DECK.pdf` is the slides; the video file is uploaded separately |
-| Repository | `https://github.com/crytobot459/pocketful-factory` (public, 41 commits, CI green) |
+| Video presentation | the video file, uploaded separately from the slides |
+| Slide presentation | `docs/DECK.pdf`, 11 pages at 1280x720 |
+| Repository | `https://github.com/crytobot459/pocketful-factory` (public, 42 commits, CI green) |
 
-Tags: technology `ai-agents`, `multi-agent`, `python`, `docker`, `agent-harness`;
-category `dark-factory`, `fintech`, `developer-tools`.
+The form measures **50 characters** on the title and **2000** on the long description, so both
+of the drafts that read better are wrong for this form and are not the ones below.
+
+**Long description** (paste exactly, 1862 characters):
+
+> We did not build a wallet app. We built the thing that builds one, and pointed it at a wallet.
+>
+> Three coding-agent seats share one BAND room. One decomposes a stage of the written specification and routes it, one implements to that specification, runs the checks and commits, and one reviews that exact revision and replies ACCEPT or REJECT. The reviewer never edits service code, so it cannot make a failing check pass by changing the thing being checked, and it writes its own adversarial scenarios in a folder the implementer is forbidden to read.
+>
+> The band reached stage 4. Each stage-N/ folder is a complete service that builds from a clean container, answers /health with no outbound network, and still passes every earlier stage's suite: 147 checks at stage 1, +35 at stage 2, +6 at stage 3, +5 at stage 4, plus the reviewer's own scenarios. The event's own harness scored every folder share 1.0, highest contiguous stage 4.
+>
+> Once a stage was dispatched no human touched it again. That is a property of the room, not of this paragraph: all 121 messages in room.json carry an agent sender and not one is from a human. The reviewer found six defects the published checks never named, and every fix came back through the room as its own commit.
+>
+> What we will not claim: the reviewer never actually vetoed anything. Every verdict in the room is an ACCEPT, six carrying findings. The veto the factory is built around is untested in this run, and FACTORY.md says so rather than leaving it for a judge to find.
+>
+> The factory is three mandates, three adapters and one room. The mandates name no endpoint, no field and no error code, so they could be pointed at a different specification tomorrow. verify_claims.py checks all 36 figures in the documents against room.json, the git history and the committed harness report, and CI fails the build when one disagrees.
 
 **Short description** (paste exactly, 249 characters):
 
 > Three coding-agent seats in one BAND room build a wallet to spec: one decomposes a stage, one implements it, one checks that exact revision and can veto it. Four buildable stages, the room export, every number checked against its evidence. Cost: $0.
-
-**Long description** (paste exactly):
-
-> We did not build a wallet app. We built the thing that builds one, and then pointed it at a wallet.
->
-> Three coding-agent seats share one BAND room. `factory-architect-df` decomposes a stage of the written specification and routes it; `factory-coder-df` implements to the specification, runs the shipped checks and commits; `factory-tester-df` reviews that exact revision and replies ACCEPT or REJECT. It never edits service code, so it cannot make a failing check pass by changing the thing being checked, and it writes its own adversarial scenarios in a `holdouts/` folder the implementer is forbidden to read.
->
-> The band reached stage 4 of the pocketful specification. Each `stage-N/` folder is a complete service that builds from a clean container, answers `/health` with no outbound network, and still passes every earlier stage's suite: 147 checks at stage 1, +35 at stage 2, +6 at stage 3, +5 at stage 4, and the reviewer's own scenarios on top. The event's own harness (`harness run --all --mode isolated`) scored every folder `share 1.0`, highest contiguous stage 4.
->
-> Once a stage was dispatched, no human touched it again. That is a property of the room, not of this paragraph: all 121 messages in `room.json` carry an agent sender and not one is from a human. The reviewer found six defects the published checks never named — a snapshot restored twice duplicating records, a stale error element surviving a successful payment, a refund cap that ignored a later correction — and every fix came back through the room as its own commit.
->
-> What we will not claim: the reviewer never actually vetoed anything. Every verdict in the room is an ACCEPT, six of them carrying findings. The veto the factory is built around is untested in this run, and `FACTORY.md` §4 says so rather than leaving it for a judge to find.
->
-> The factory is three mandates, three adapters and one room. The mandates name no endpoint, no field and no error code, so they could be pointed at a different specification tomorrow. `verify_claims.py` checks all 36 figures in the documents against `room.json`, the git history and the committed harness report, and CI fails the build when one disagrees.
 
 Then: submit, and keep the receipt — a screenshot of the confirmation and the submission URL.
 
