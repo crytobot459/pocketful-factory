@@ -52,6 +52,75 @@ jobs:
           docker rm -f pf
           exit 1
 
+  # The event disqualifies an entry whose service does not start from a clean container with
+  # no outbound network, and every other job here runs with a network attached: it pip
+  # installs, it curls. So this one job runs the built image with networking switched off and
+  # asks it the only question that matters -- does it answer anyway.
+  #
+  # The health check goes in through `docker exec` rather than through `-p`. A container on
+  # `--network none` has no address but loopback, and a published port is a DNAT rule to an
+  # address that does not exist, so forwarding to one is not something to rely on. Loopback
+  # inside the container always works, and the service binds 0.0.0.0 as RUN.md says it does.
+  offline:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        stage: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build stage-${{ matrix.stage }}
+        run: docker build -t offline-stage${{ matrix.stage }} ./stage-${{ matrix.stage }}
+
+      - name: Serve with no outbound network and answer /health
+        run: |
+          docker run -d --name pf --network none -e PORT=8080 offline-stage${{ matrix.stage }}
+          ok=0
+          for i in $(seq 1 60); do
+            if docker exec pf python3 -c "
+          import sys, urllib.request
+          body = urllib.request.urlopen('http://127.0.0.1:8080/health', timeout=2).read()
+          sys.exit(0 if b'\"status\":\"ok\"' in body else 1)" 2>/dev/null; then
+              echo "healthy after ${i}s on an isolated network"
+              ok=1
+              break
+            fi
+            sleep 1
+          done
+          docker logs pf || true
+          docker rm -f pf
+          [ "$ok" = 1 ] || { echo "did not answer within 60s with no outbound network"; exit 1; }
+
+      - name: Confirm the network really was switched off
+        run: |
+          # `docker run -d` prints the container id, which is what `docker exec` takes.
+          # `$!` would be the pid of the docker client, not of a container.
+          probe=$(docker run -d --rm --network none -e PORT=8080 \
+            offline-stage${{ matrix.stage }} sleep 30)
+          trap 'docker rm -f "$probe" >/dev/null 2>&1 || true' EXIT
+          sleep 2
+          if docker exec "$probe" python3 -c "
+          import socket; socket.create_connection(('1.1.1.1', 53), 3)"; then
+            echo "the container reached the internet; --network none is not in force"
+            exit 1
+          fi
+          echo "confirmed: no outbound network"
+
+  # The deck the form asks for is rendered from docs/DECK.md, so it can only be wrong in
+  # one interesting way: a slide that needs more room than a 16:9 page has. That drops text
+  # off the bottom of the slide, which is how a claim goes missing from the presentation
+  # while still sitting in the deck. The check measures the laid-out page and fails rather
+  # than scaling a slide into unreadability.
+  deck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python3 tools/make_deck.py --check
+
   # Each stage folder must import cleanly on its own, since a judge only talks
   # to it over HTTP but a broken import means the image built from nothing.
   imports:

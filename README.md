@@ -7,7 +7,8 @@
 A software factory in three coding-agent seats. One of them decomposes a stage of a written
 specification, one implements it, and one checks the result against that specification and
 vetoes it if it is wrong. They work in one room, and once a stage is dispatched a human does not
-touch it again.
+touch it again — which is checkable rather than promised: **all 121 messages in `room.json`
+carry an agent sender, and not one is from a human.**
 
 They were pointed at the `pocketful` track of the BAND Dark Factory hackathon: a wallet and
 payments service where money must never be created, destroyed, or spent twice — under retries,

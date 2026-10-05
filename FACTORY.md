@@ -53,6 +53,15 @@ python -m harness run --track pocketful --repo . --all --mode isolated
 Every folder scored `share 1.0` and no folder passed the next stage's whole suite, so none of
 them is a later answer filed in the wrong place. The full report is in `docs/harness-runs/`.
 
+**Nobody was in the loop but the task.** The event scores autonomy as "the task you dispatch
+for each stage is the only human input — no steering, approvals or reruns", and that is a
+property of the room rather than of this document: all 121 messages in `room.json` carry an
+agent sender, and not one is from a human. A judge can count the senders in the file, or run
+`python3 -c "import json,collections;print(collections.Counter(m['senderType'] for m in json.load(open('room.json'))['messages']))"`.
+What the room cannot show is who pressed the dispatch that opened each stage; that is a fact
+about the machine, not about the log, and it is why the export is published whole rather than
+as an extract.
+
 **What that number is worth, stated plainly.** The event ships only part of each stage's
 checks. Stage 1's 147 and stage 2's 35 are a real sample of the grading suite. Stage 3 ships 6
 checks and stage 4 ships 5, so for those two the harness result is close to a smoke test. What

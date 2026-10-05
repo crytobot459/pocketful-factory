@@ -127,6 +127,8 @@ def room_claims() -> list[dict]:
         by_seat[name] = by_seat.get(name, 0) + 1
     seats = {m["senderId"] for m in messages
              if str(m.get("senderType", "")).lower() == "agent" and m.get("senderId")}
+    humans = sorted({str(m.get("senderName") or "?") for m in messages
+                     if str(m.get("senderType", "")).lower() != "agent"})
 
     tokens_in = tokens_out = 0
     for m in messages:
@@ -243,6 +245,23 @@ def room_claims() -> list[dict]:
              states=f"{_locks_mentioned(data)} stage locks are announced in the room",
              near=r"lock", any=[rf"\b(?:{_locks_mentioned(data)}|{_word(_locks_mentioned(data))}) "
                                 r"stage locks?\b"]),
+
+        # The event scores autonomy as "the task you dispatch for each stage is the only
+        # human input -- no steering, approvals or reruns". An export whose every message
+        # carries an agent sender is that claim made checkable: a judge can count the
+        # senders in `room.json` in one command, and this fails the moment a human message
+        # is in the log and a document still says nobody was in the loop.
+        dict(id="room.autonomy", source="room.json",
+             states=f"all {len(messages)} messages in the export were sent by an agent "
+                    f"seat; no human account posted in the room"
+                    + (f" ({', '.join(humans)} did)" if humans else ""),
+             near=r"human|agent seat|nobody|no one",
+             any=[r"all %d (?:messages )?carry an? agent sender" % len(messages),
+                  r"every message carries an agent sender",
+                  r"all %d (?:of the )?messages (?:are|from) (?:from )?agents?" % len(messages),
+                  r"not one (?:message )?is from a human",
+                  r"no human (?:account )?(?:posted|messaged|spoke|appears?)"]
+             + ([r"%s" % re.escape(h) for h in humans] if humans else [])),
     ]
 
 

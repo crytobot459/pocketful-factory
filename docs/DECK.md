@@ -1,6 +1,6 @@
 # Deck — pocketful-factory
 
-10 slides. One idea per slide. Every number on a slide is one the band actually reported in the
+11 slides. One idea per slide. Every number on a slide is one the band actually reported in the
 room or the event harness produced.
 
 ---
@@ -27,7 +27,8 @@ A factory, not a service. Three coding agents that build the service:
 - one **verifies** that exact commit and **vetoes** it if it is wrong
 
 They share one room. Once a stage is dispatched, no human is in the loop until the stage is
-locked.
+locked — and that is checkable rather than promised: all 121 messages in the exported room
+carry an agent sender, and not one is from a human.
 
 ## 3. Why a factory and not a better code review
 
@@ -54,20 +55,25 @@ that the published checks never asked for:
 | stage 4 | the refund cap used the original amount, so a correction downward did not tighten it | fine | `b88cb7b` |
 | stage 4 | a batch correction could be applied to a settlement without all of its members | fine | `b88cb7b` |
 
-Six, and each one is a commit whose subject says what changed — `4004384` names three of them
-in a single line. Each was reported with numbers, and the fixes came back through the room as
-new commits — but as acceptances with findings attached, not as vetoes. In this run the
+Six. Slide 5 says what the room did about them, and what it did not do.
+
+## 5. What the run admits
+
+Each one of those six is a commit whose subject says what changed — `4004384` names three of them
+in a single line. Each was reported with numbers, and the fixes came back through the room as new
+commits.
+
+But they came back as **acceptances with findings attached, not as vetoes.** In this run the
 reviewer never rejected anything: every verdict the room carries is an ACCEPT, each naming the
-revision it was issued against. The veto the factory is built
-around is still untested in this room, and that is stated in FACTORY.md §4 rather than left
-for a judge to discover.
+revision it was issued against. The veto the factory is built around is still untested in this
+room, and that is stated in FACTORY.md §4 rather than left for a judge to discover.
 
 **Stage 3 is the honest gap.** Its eleven scenarios ran and all of them passed, so there is
 nothing to list. Two of the four stages' holdout files were also written *after* the verdict
 rather than before it, which is backwards; those files say so at the top, and the fix — a
-reviewer that writes its scenario first and hands it over as the task — is slide 10.
+reviewer that writes its scenario first and hands it over as the task — is slide 11.
 
-## 5. What it produced
+## 6. What it produced
 
 Four stages of the wallet specification. Each folder is a complete service that builds from a
 clean container and passes every earlier stage's checks as well as its own.
@@ -79,7 +85,7 @@ clean container and passes every earlier stage's checks as well as its own.
 | 3 — history and corrections | 147 + 35 + 6 |
 | 4 — refunds and batch corrections | 147 + 35 + 6 + 5 |
 
-## 6. Verified by the event's own harness
+## 7. Verified by the event's own harness
 
 Not by us. The organiser's harness, isolated mode, building each folder from scratch:
 
@@ -99,7 +105,7 @@ a smoke test. What carries those two is the reviewer's own adversarial work in `
 not the six and five. That number is directional, and we say so in the factory document
 rather than let a judge work it out.
 
-## 7. What it cost
+## 8. What it cost
 
 **$0.** Every seat ran on a free tier.
 
@@ -107,7 +113,7 @@ Room window: about 28 hours wall-clock across two calendar days, of which the us
 roughly four. The rest was infrastructure: restarting seats, draining a backlog from an
 abandoned earlier room, and one long verification that had to be split in two.
 
-## 8. It failed in instructive ways
+## 9. It failed in instructive ways
 
 A factory that never fails is a diagram.
 
@@ -121,7 +127,7 @@ A factory that never fails is a diagram.
 
 All three are written up in `FACTORY.md`, because that is what saves the next team the day.
 
-## 9. Who it is for
+## 10. Who it is for
 
 Teams who ship money-moving code and cannot afford a two-hour review per change — and who do
 not trust a black box to do it.
@@ -129,7 +135,7 @@ not trust a black box to do it.
 The factory is not vendor-specific. Three mandates, three adapters, one room. Point it at a
 different specification and the routing, the veto, and the discipline transfer unchanged.
 
-## 10. What we would do next
+## 11. What we would do next
 
 - The last stage's checks were the thinnest of the four. More holdouts, written before the
   implementation rather than after, would catch more.

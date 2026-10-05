@@ -55,9 +55,21 @@ A checklist, in the order the failures actually happen. Each step names the thin
 
 - [ ] The video shows **the factory working**: the room, a handoff between seats, and the result
       it produced. A slideshow about the factory is not the factory.
-- [ ] The video contains the **BAND Desktop room** recording. This is a hard disqualifier, not a
-      scoring item: the event states a video without it disqualifies the team. It has to be the
-      app, not `app.band.ai` in a browser, and it has to be long enough to read.
+- [ ] The video contains the **BAND room** recording. This is a hard disqualifier, not a scoring
+      item: the event states a video without it disqualifies the team. Two things about ours are
+      worth knowing before you decide whether to re-shoot anything:
+  - The room shot is `app.band.ai/sessions/affa9999-...` in a browser, not the Band Desktop
+    binary. The band was driven by the BAND CLI and the agent API from three terminals, which
+    the event explicitly allows ("a seat can be any runtime BAND supports, including one you
+    build on the BAND SDK and run on your own machine"), and the room it recorded is the room
+    `room.json` exports — same id, same 121 messages, same verdicts.
+  - It cannot be in Band Desktop's sidebar, and that is a property of the room rather than a
+    missing export: `jam room participants` lists `factory-architect-df` as owner, so the
+    human-account room list leaves it out and `jam room rename` answers 403.
+  - So the shot has to *say* that, rather than leave a judge to work out why the app in the
+    video is a browser. The narration names it, and shot three prints the same room back with
+    BAND's own CLI. If you would rather not rely on that, the alternative is installing Band
+    Desktop and finding a room it will list — which for this room there is not.
 - [ ] The video shows the reviewer finding something the shipped checks never asked for — and it
       says plainly what form that took. In this run it reported six findings attached to
       acceptances and never vetoed, so the honest shot is a verdict carrying numbers, plus the
@@ -65,4 +77,40 @@ A checklist, in the order the failures actually happen. Each step names the thin
       is worse than one that admits the gap.
 - [ ] The presentation covers the factory design, what it cost, a bad result it caught, and the
       stage it reached.
+
+## The form, field by field
+
+The event's form is `https://lablab.ai/ai-hackathons/wearedevelopers-hackathon` and it takes
+exactly eight fields. There is **no demo URL field** on this one, so do not go looking for one.
+
+| Field | Value |
+|---|---|
+| Project title | `Pocketful Factory — three coding agents, one BAND room, four stages` |
+| Cover image | `docs/cover.png` (1920x1080) |
+| Video presentation | `docs/DECK.pdf` is the slides; the video file is uploaded separately |
+| Repository | `https://github.com/crytobot459/pocketful-factory` (public, 41 commits, CI green) |
+
+Tags: technology `ai-agents`, `multi-agent`, `python`, `docker`, `agent-harness`;
+category `dark-factory`, `fintech`, `developer-tools`.
+
+**Short description** (paste exactly, 249 characters):
+
+> Three coding-agent seats in one BAND room build a wallet to spec: one decomposes a stage, one implements it, one checks that exact revision and can veto it. Four buildable stages, the room export, every number checked against its evidence. Cost: $0.
+
+**Long description** (paste exactly):
+
+> We did not build a wallet app. We built the thing that builds one, and then pointed it at a wallet.
+>
+> Three coding-agent seats share one BAND room. `factory-architect-df` decomposes a stage of the written specification and routes it; `factory-coder-df` implements to the specification, runs the shipped checks and commits; `factory-tester-df` reviews that exact revision and replies ACCEPT or REJECT. It never edits service code, so it cannot make a failing check pass by changing the thing being checked, and it writes its own adversarial scenarios in a `holdouts/` folder the implementer is forbidden to read.
+>
+> The band reached stage 4 of the pocketful specification. Each `stage-N/` folder is a complete service that builds from a clean container, answers `/health` with no outbound network, and still passes every earlier stage's suite: 147 checks at stage 1, +35 at stage 2, +6 at stage 3, +5 at stage 4, and the reviewer's own scenarios on top. The event's own harness (`harness run --all --mode isolated`) scored every folder `share 1.0`, highest contiguous stage 4.
+>
+> Once a stage was dispatched, no human touched it again. That is a property of the room, not of this paragraph: all 121 messages in `room.json` carry an agent sender and not one is from a human. The reviewer found six defects the published checks never named — a snapshot restored twice duplicating records, a stale error element surviving a successful payment, a refund cap that ignored a later correction — and every fix came back through the room as its own commit.
+>
+> What we will not claim: the reviewer never actually vetoed anything. Every verdict in the room is an ACCEPT, six of them carrying findings. The veto the factory is built around is untested in this run, and `FACTORY.md` §4 says so rather than leaving it for a judge to find.
+>
+> The factory is three mandates, three adapters and one room. The mandates name no endpoint, no field and no error code, so they could be pointed at a different specification tomorrow. `verify_claims.py` checks all 36 figures in the documents against `room.json`, the git history and the committed harness report, and CI fails the build when one disagrees.
+
+Then: submit, and keep the receipt — a screenshot of the confirmation and the submission URL.
+
 - [ ] Submit the repository URL, the presentation and the video, then keep the receipt.
