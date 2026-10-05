@@ -82,6 +82,7 @@ if at.exception:
 
 click("Seed the fixture")
 click("Sign in as Ada")
+click("Try to overdraw")
 click("Fire it twice")
 
 if at.exception:
@@ -97,7 +98,7 @@ need = [
     ("signed in as Ada at EUR 100.00",
      lambda: any("signed in as Ada" in s and "100.00" in s for s in ok)),
     ("the overdraft is refused at 409 and the balance does not move",
-     lambda: metric("response").strip() == "409"
+     lambda: metric("response").startswith("409")
              and metric("balance after") == metric("balance before")
              and any("unchanged" in s for s in ok)),
     ("the same key twice moves the money once, 100.00 -> 92.23",

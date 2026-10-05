@@ -205,20 +205,31 @@ st.header("2. Pay more than you have")
 st.caption("The refusal arrives before the error code, and the balance does not move. The "
            "two balances below are both read from the server.")
 
-before = balance_of(token)
-st_, body = call("POST", "/payments", token, idem="ui-overdraft-1",
-                 to_handle="bob", amount=999999,
-                 note="more than she has")
-after = balance_of(token)
+# This runs once, from the button, and the outcome is kept. Firing it during render would
+# send a payment on every rerun: idempotent, so the service is right, but a judge watching
+# the network tab would see a write on every click anywhere on the page.
+if "overdraft" not in st.session_state:
+    st.session_state["overdraft"] = None
+if st.button("Try to overdraw"):
+    before = balance_of(token)
+    st_, body = call("POST", "/payments", token, idem="ui-overdraft-1",
+                     to_handle="bob", amount=999999, note="more than she has")
+    st.session_state["overdraft"] = (before, st_, body, balance_of(token))
 
-c1, c2, c3 = st.columns(3)
-c1.metric("balance before", money(before))
-c2.metric("response", f"{st_} {body.get('code', '')}".strip())
-c3.metric("balance after", money(after))
-if before == after and st_ == 409:
-    st.success(f"refused, and the balance is unchanged at {money(after)}")
+od = st.session_state["overdraft"]
+if od:
+    before, st_, body, after = od
+    c1, c2, c3 = st.columns(3)
+    c1.metric("balance before", money(before))
+    c2.metric("response", f"{st_} {body.get('error', {}).get('code', '')}".strip())
+    c3.metric("balance after", money(after))
+    if before == after and st_ == 409:
+        st.success(f"refused, and the balance is unchanged at {money(after)}")
+    else:
+        st.error(f"expected 409 and an unchanged balance; got {st_}, "
+                 f"{money(before)} → {money(after)}")
 else:
-    st.error(f"expected 409 and an unchanged balance; got {st_}, {before} → {after}")
+    st.info("Press the button. Nothing is sent until you do.")
 
 # --- 3. pay twice -----------------------------------------------------------------
 
@@ -228,6 +239,8 @@ st.caption("One idempotency key, fired twice. The money moves once.")
 before = balance_of(token)
 key = st.session_state.setdefault("idem", f"ui-{int(time.time()) // 60}")
 st.write(f"idempotency key: `{key}`")
+st.caption("The key is sent as the `Idempotency-Key` header, which is where "
+           "`get_idem_key` looks for it.")
 
 if st.button("Fire it twice"):
     first = call("POST", "/payments", token, idem=key, to_handle="bob", amount=777,
